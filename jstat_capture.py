@@ -73,10 +73,6 @@ for i in split_jps_list:
     PIDs.append(nums_from_string.get_nums(str(i)))
 print(PIDs)
 
-# for jps_output_per_instance in PIDs:
-#     for pid in jps_output_per_instance:
-#         print(pid)
-
 co = 0
 while True:
     for ip in ec2_instance_ip_list:
@@ -88,9 +84,13 @@ while True:
             look_for_keys=False
         )
         for jps_iterator in PIDs[co]:
-            stdin, stdout, stderr = c.exec_command(f'jstat -gcutil 6466 250')
-            print(stdout.read())
-            print(stderr.read())
+            stdin, stdout, stderr = c.exec_command(f'jstat -gcutil 6466 5000', get_pty=True)
+            for line in iter(stdout.readline, ""):
+                print(line, end="")
+            # for l in line_buffered(stdout):
+            # #     print(l)
+            # print(stdout.read())
+            # print(stderr.read())
     c.close()
 
     co += 1
