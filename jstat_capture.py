@@ -1,6 +1,8 @@
 import boto3
 import paramiko
 import nums_from_string
+import concurrent.futures
+
 
 emr = boto3.client('emr')  # set the boto3 variable
 
@@ -10,7 +12,7 @@ response = emr.list_clusters(
         'RUNNING'
     ]
 )
-Cluster_Id = (response["Clusters"][0]["Id"]) # for multiple clusters this will need to be changed.
+Cluster_Id = (response["Clusters"][0]["Id"])  # for multiple clusters this will need to be changed.
 # print(Cluster_Id)
 
 response = emr.list_instances(
@@ -35,25 +37,25 @@ commands = [
 ]
 
 k = paramiko.RSAKey.from_private_key_file(r'C:\\Users\yaniv\Documents\get-a-job\USeast1keypair.pem')
-c = paramiko.SSHClient()
-c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 standard_jps_output = []
 
 username = 'root'  # generally this should be ec2-user, but for me proccesses only worked with root.
 
-for ip in ec2_instance_ip_list:
-    c.connect(
-        hostname=ip,
+for InternetAddress in ec2_instance_ip_list:
+    ssh.connect(
+        hostname=InternetAddress,
         username=f'{username}',
         pkey=k,
         allow_agent=False,
         look_for_keys=False
     )
     for command in commands:
-        stdin, stdout, stderr = c.exec_command(command)
+        stdin, stdout, stderr = ssh.exec_command(command)
         standard_jps_output.append(stdout.read())
         # print(stderr.read())
-c.close()
+ssh.close()
 
 # print(standard_jps_output)
 
@@ -71,26 +73,38 @@ split_jps_list = (listBreaker(standard_jps_output))
 PIDs = []
 for i in split_jps_list:
     PIDs.append(nums_from_string.get_nums(str(i)))
-print(PIDs)
 
-co = 0
-while True:
-    for ip in ec2_instance_ip_list:
-        c.connect(
-            hostname=ip,
+print(PIDs)
+amount_of_pids = []
+for i in range(len(PIDs)):
+    amount_of_pids.append(len(PIDs[i]))
+for num in amount_of_pids:
+    sum_of_all_pids = sum(amount_of_pids)
+print(sum_of_all_pids)
+
+OPEN_VAR = 'a'
+
+
+# to here I'm good, right?
+
+def multi_jstat_output(pid):
+    stdin, stdout, stderr = ssh.exec_command(f'jstat -gcutil {pid} 10000', get_pty=True)
+    for line in iter(stdout.readline, ""):
+        # print(line, end="")
+        with open(f"C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs\{pid}_jstat_output.txt", OPEN_VAR) as o:
+            o.write(line)
+
+
+if __name__ == '__main__':
+    for num_of_ip in range(len(ec2_instance_ip_list)):
+        ssh.connect(
+            hostname=f'{ec2_instance_ip_list[num_of_ip]}',
             username=f'{username}',
             pkey=k,
             allow_agent=False,
             look_for_keys=False
         )
-        for jps_iterator in PIDs[co]:
-            stdin, stdout, stderr = c.exec_command(f'jstat -gcutil 6466 5000', get_pty=True)
-            for line in iter(stdout.readline, ""):
-                print(line, end="")
-            # for l in line_buffered(stdout):
-            # #     print(l)
-            # print(stdout.read())
-            # print(stderr.read())
-    c.close()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(multi_jstat_output, PIDs[num_of_ip])
 
-    co += 1
+
