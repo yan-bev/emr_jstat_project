@@ -2,6 +2,8 @@ import boto3
 import paramiko
 import nums_from_string
 import concurrent.futures
+import multiprocessing
+
 
 
 emr = boto3.client('emr')  # set the boto3 variable
@@ -97,6 +99,8 @@ def multi_jstat_output(pid):
             o.write(line)
 
 
+multiprocessing.set_start_method('spawn', True)
+
 if __name__ == '__main__':
     for num_of_ip in range(len(ec2_instance_ip_list)):
         ssh.connect(
@@ -108,5 +112,5 @@ if __name__ == '__main__':
         )
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(multi_jstat_output, PIDs[num_of_ip])
-
+            print(1)
 
