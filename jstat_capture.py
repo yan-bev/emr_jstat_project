@@ -112,5 +112,5 @@ if __name__ == '__main__':
         )
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(multi_jstat_output, PIDs[num_of_ip])
-            print(1)
+            break
 
