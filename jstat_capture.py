@@ -75,17 +75,19 @@ for i in split_jps_list:
     PIDs.append(nums_from_string.get_nums(str(i)))
 
 print(PIDs)
-amount_of_pids = []
-for i in range(len(PIDs)):
-    amount_of_pids.append(len(PIDs[i]))
-for num in amount_of_pids:
-    sum_of_all_pids = sum(amount_of_pids)
-print(sum_of_all_pids)
+# amount_of_pids = []
+# for i in range(len(PIDs)):
+#     amount_of_pids.append(len(PIDs[i]))
+# for num in amount_of_pids:
+#     sum_of_all_pids = sum(amount_of_pids)
+# print(sum_of_all_pids)
 
 OPEN_VAR = 'a'
 
 
 # to here I'm good, right?
+
+
 
 def multi_jstat_output(pid):
     stdin, stdout, stderr = ssh.exec_command(f'jstat -gcutil {pid} 10000', get_pty=True)
