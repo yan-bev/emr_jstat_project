@@ -1,9 +1,10 @@
 import boto3
 import paramiko
 import nums_from_string
-import concurrent.futures
-import multiprocessing
+import time
 
+import subprocess, signal
+import os
 
 
 emr = boto3.client('emr')  # set the boto3 variable
@@ -32,11 +33,10 @@ except:
 print(ec2_instance_ip_list)
 
 # TODO: you have to set the ec2 instance to allow you to ssh directly into root.
-commands = [
+command = "jps | grep 'Main' | tr -d [:alpha:]"
     # "sudo",   # this depends on if the default user can 'see' the processes.
-    "jps | grep 'Main' | tr -d [:alpha:]"
 
-]
+
 
 k = paramiko.RSAKey.from_private_key_file(r'C:\\Users\yaniv\Documents\get-a-job\USeast1keypair.pem')
 ssh = paramiko.SSHClient()
@@ -53,10 +53,9 @@ for InternetAddress in ec2_instance_ip_list:
         allow_agent=False,
         look_for_keys=False
     )
-    for command in commands:
-        stdin, stdout, stderr = ssh.exec_command(command)
-        standard_jps_output.append(stdout.read())
-        # print(stderr.read())
+    stdin, stdout, stderr = ssh.exec_command(command)
+    standard_jps_output.append(stdout.read())
+    # print(stderr.read())
 ssh.close()
 
 # print(standard_jps_output)
@@ -91,15 +90,12 @@ OPEN_VAR = 'a'
 
 
 
-def multi_jstat_output(pid):
-    stdin, stdout, stderr = ssh.exec_command(f'jstat -gcutil {pid} 10000', get_pty=True)
-    for line in iter(stdout.readline, ""):
-        # print(line, end="")
-        with open(f"C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs\{pid}_jstat_output.txt", OPEN_VAR) as o:
-            o.write(line)
+# def multi_jstat_output(pid):
+#     stdin, stdout, stderr = ssh.exec_command(f'jstat -gcutil {pid} 10000 > /tmp/jstat_output/{pid} &')
+#     print(pid)
 
 
-multiprocessing.set_start_method('spawn', True)
+
 
 if __name__ == '__main__':
     for num_of_ip in range(len(ec2_instance_ip_list)):
@@ -110,7 +106,19 @@ if __name__ == '__main__':
             allow_agent=False,
             look_for_keys=False
         )
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(multi_jstat_output, PIDs[num_of_ip])
-            break
+        for pid in PIDs[num_of_ip]:
+            stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 250 7 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
+            print(pid)
+            time.sleep(5)
 
+            # for testing purposes
+            # p = subprocess.Popen(['ps', '-A']), stdout=subprocess.PIPE)
+            # out, err = p.communicate()
+            #     for line
+        ssh.close()
+
+
+
+
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #   executor.map(multi_jstat_output, PIDs[num_of_ip], timeout=1)
