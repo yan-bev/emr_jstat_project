@@ -5,26 +5,31 @@ import time
 
 import subprocess, signal
 import os
+# import sys
 
+# create here function
 
-emr = boto3.client('emr')  # set the boto3 variable
+def get_ips():
 
-# check for all running clusters
-response = emr.list_clusters(
-    ClusterStates=[
-        'RUNNING'
-    ]
-)
-Cluster_Id = (response["Clusters"][0]["Id"])  # for multiple clusters this will need to be changed.
-# print(Cluster_Id)
+    emr = boto3.client('emr')  # set the boto3 variable
 
-response = emr.list_instances(
-    ClusterId=f"{Cluster_Id}"
-)
+    # check for all running clusters
+    clusters = emr.list_clusters(
+        ClusterStates=[
+            'RUNNING'
+        ]
+    )
+    for cluster in clusters["Clusters"]:
+        cluster_id = (clusters["Clusters"][0]["Id"])  # for multiple clusters this will need to be changed.
+        # print(cluster_id)
+
+        instances = emr.list_instances( # don't use the same var name.
+            ClusterId=f"{cluster_id}"
+    )
 
 counter = 0
 ec2_instance_ip_list = []
-try:
+try:  # try this as a for loop, for ec2.... response [Instances]
     while True:
         ec2_instance_ip_list.append(response["Instances"][counter]["PublicIpAddress"])
         counter += 1
@@ -32,7 +37,21 @@ except:
     pass
 print(ec2_instance_ip_list)
 
-# TODO: you have to set the ec2 instance to allow you to ssh directly into root.
+counter = 0
+ec2_instance_id_list = []  # this should be without _list
+try:
+    while True:
+        ec2_instance_id_list.append(response["Instances"][counter]["Ec2InstanceId"])
+        counter += 1
+except:
+    pass
+ec2_instance_id_last_4_chars = []
+for i in ec2_instance_id_list:
+    ec2_instance_id_last_4_chars.append(i[-4:])
+
+
+
+        # TODO: you have to set the ec2 instance to allow you to ssh directly into root.
 command = "jps | grep 'Main' | tr -d [:alpha:]"
     # "sudo",   # this depends on if the default user can 'see' the processes.
 
@@ -55,8 +74,9 @@ for InternetAddress in ec2_instance_ip_list:
     )
     stdin, stdout, stderr = ssh.exec_command(command)
     standard_jps_output.append(stdout.read())
-    # print(stderr.read())
-ssh.close()
+    # print(stderr.read(), file=sys.stderr)
+
+ssh.close()  # this should be within the for loop.
 
 # print(standard_jps_output)
 
@@ -69,32 +89,14 @@ def listBreaker(jps_output):  # this breaks the list up into a list of lists
     return(res)
 
 split_jps_list = (listBreaker(standard_jps_output))
-# print(split_jps_list)
 
 PIDs = []
 for i in split_jps_list:
     PIDs.append(nums_from_string.get_nums(str(i)))
 
 print(PIDs)
-# amount_of_pids = []
-# for i in range(len(PIDs)):
-#     amount_of_pids.append(len(PIDs[i]))
-# for num in amount_of_pids:
-#     sum_of_all_pids = sum(amount_of_pids)
-# print(sum_of_all_pids)
 
 OPEN_VAR = 'a'
-
-
-# to here I'm good, right?
-
-
-
-# def multi_jstat_output(pid):
-#     stdin, stdout, stderr = ssh.exec_command(f'jstat -gcutil {pid} 10000 > /tmp/jstat_output/{pid} &')
-#     print(pid)
-
-
 
 
 if __name__ == '__main__':
@@ -111,14 +113,9 @@ if __name__ == '__main__':
             print(pid)
             time.sleep(5)
 
+
             # for testing purposes
             # p = subprocess.Popen(['ps', '-A']), stdout=subprocess.PIPE)
             # out, err = p.communicate()
             #     for line
         ssh.close()
-
-
-
-
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #   executor.map(multi_jstat_output, PIDs[num_of_ip], timeout=1)
