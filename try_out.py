@@ -2,10 +2,6 @@ import boto3
 import paramiko
 import nums_from_string
 import time
-import sys
-
-import subprocess, signal
-import os
 
 from filepath import KEYPATH
 PEM = KEYPATH
@@ -30,6 +26,7 @@ def cluster_id():
     for num_of_clusters in range(len(clusters["Clusters"])):
         cl_id.append(clusters["Clusters"][num_of_clusters]["Id"])  # every cluster id is logged.
     return cl_id
+print(cluster_id())
 
 
 def instance_ip():
@@ -40,18 +37,18 @@ def instance_ip():
     """
     emr = boto3.client('emr')  # set the boto3 variable
 
-    ec2_by_cluster = []
+    ec2s = []
     for cl in cluster_id():
         global instances
         instances = emr.list_instances(
             ClusterId=f"{cl}"
         )
-        ec2s = []
+
         for i in range(len(instances["Instances"])):
             ec2s.append(instances["Instances"][i]["PublicIpAddress"])
-        ec2_by_cluster.append(ec2s)
-        del ec2s
-    return ec2_by_cluster
+        # ec2_by_cluster.append(ec2s)
+        # del ec2s
+    return ec2s
 print(instance_ip())
 
 
@@ -76,11 +73,11 @@ def instance_label():
         instances = emr.list_instances(
             ClusterId=f"{cl}"
         )
-        ec2s = []
+        ec2_instances = []
         for i in range(len(instances["Instances"])):
-            ec2s.append(instances["Instances"][i]["Ec2InstanceId"][-4:])
-        ec2_sep.append(ec2s)
-        del ec2s
+            ec2_instances.append(instances["Instances"][i]["Ec2InstanceId"][-4:])
+        ec2_sep.append(ec2_instances)
+        del ec2_instances
     return ec2_sep
 
 # TODO: you have to set the ec2 instance to allow you to ssh directly into root.
@@ -101,7 +98,7 @@ def jps_command():
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present numbers.
     :return:
-    list [[in cluster1:[instance1(pid1, pid2)][instance2(pid1, pid2]][in cluster 2:pid1, ...]
+    list [[instance1(pid1, pid2)][instance2(pid1, pid2]]
     """
     SEARCH_TERM = 'Main'
     command = f"jps | grep '{SEARCH_TERM}' | tr -d [:alpha:]"
@@ -114,21 +111,20 @@ def jps_command():
     standard_jps_output = []
 
     username = 'root'  # generally this should be ec2-user, but for me proccesses only worked with root.
-    clusters = cluster_id()
     ips = instance_ip()
-    for cl in range(len(clusters)):
-        for ip in ips[cl]:
-            ssh.connect(
-                hostname=ip,
-                username=f'{username}',
-                pkey=k,
-                allow_agent=False,
-                look_for_keys=False
-            )
-            stdin, stdout, stderr = ssh.exec_command(command)
-            standard_jps_output.append(stdout.read())
-            # print(stderr.read(), file=sys.stderr)
-            ssh.close()
+
+    for ip in ips:
+        ssh.connect(
+            hostname=ip,
+            username=f'{username}',
+            pkey=k,
+            allow_agent=False,
+            look_for_keys=False
+        )
+        stdin, stdout, stderr = ssh.exec_command(command)
+        standard_jps_output.append(stdout.read())
+        # print(stderr.read(), file=sys.stderr)
+        ssh.close()
 
     split_jps_list = (listBreaker(standard_jps_output))
     PIDs = []
@@ -143,34 +139,24 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 USERNAME = 'root'
 
 ips = instance_ip()
-# flat_list = len([x for sublist in ips for x in sublist])
-# print(f'flatlist:{flat_list}')
-clusters = cluster_id()
 PIDs = jps_command()
 
 
 if __name__ == '__main__':
-    for cl in range(len(clusters)):
-        print(f'cl:{cl}')
-        for ip in ips[cl]:
-            num = len(ips[cl])
-            print(num)
-            print(f'ip:{ip}')
-            # ssh.connect(
-            #     hostname=f'{ip}',
-            #     username=USERNAME,
-            #     pkey=k,
-            #     allow_agent=False,
-            #     look_for_keys=False
-            # )
+    for ip in range(len(ips)):
+        ssh.connect(
+            hostname=f'{ips[ip]}',
+            username=USERNAME,
+            pkey=k,
+            allow_agent=False,
+            look_for_keys=False
+        )
 
-            for pid in (PIDs[num]):
-                print(pid)
-                time.sleep(2)
-                # stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 250 7 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
-                # print(pid)
-                # time.sleep(5)
-        continue
+        for pid in (PIDs[ip]):
+            stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 250 7 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
+            print(pid)
+            time.sleep(5)
+
 
 
                 # for testing purposes
