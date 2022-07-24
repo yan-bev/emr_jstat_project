@@ -52,11 +52,8 @@ def get_aws_info_by_cluster():
         ec2_instance_ips_by_cl.append(ec2_by_cluster)
         del ec2_by_cluster
 
-
+# ask Ido if i am better served by creating a class or creating multiple functions, or just this one function?
     return [ec2_instance_ips_by_cl, last_four_clusterId, last_four_instanceId]
-
-
-
 
         # TODO: you have to set the ec2 instance to allow you to ssh directly into root.
 
