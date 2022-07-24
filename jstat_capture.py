@@ -7,53 +7,62 @@ import subprocess, signal
 import os
 # import sys
 
-# create here function
 
-def get_ips():
+def get_aws_info_by_cluster():
+    """ uses boto3 to list out cluster and instance information
+        0 - returns a list of clusters and ips in the form of
+        [cluster1, [ip1, ip2, ipn], [cluster2], [ip1, ip2, ipn]...]
+        1 - returns the identifiers for clusters
+        2 - returns the identifiers for ec2 Ids
+    :return: lists
+    """
+
 
     emr = boto3.client('emr')  # set the boto3 variable
 
     # check for all running clusters
     clusters = emr.list_clusters(
         ClusterStates=[
-            'RUNNING'
-        ]
-    )
-    for cluster in clusters["Clusters"]:
-        cluster_id = (clusters["Clusters"][0]["Id"])  # for multiple clusters this will need to be changed.
-        # print(cluster_id)
+            'RUNNING',
+            'STARTING'
+            ]
+        )
+    last_four_clusterId = []
 
-        instances = emr.list_instances( # don't use the same var name.
-            ClusterId=f"{cluster_id}"
-    )
+    cl_id = []
+    for num_of_clusters in range(len(clusters["Clusters"])):
+        cl_id.append(clusters["Clusters"][num_of_clusters]["Id"])  # every cluster id is logged.
+    for cl in cl_id:
+        last_four_clusterId.append(cl[-4:])
 
-counter = 0
-ec2_instance_ip_list = []
-try:  # try this as a for loop, for ec2.... response [Instances]
-    while True:
-        ec2_instance_ip_list.append(response["Instances"][counter]["PublicIpAddress"])
-        counter += 1
-except:
-    pass
-print(ec2_instance_ip_list)
+    ec2_instance_ips_by_cl = []
+    last_four_instanceId = []
+    for cl in cl_id:
+        instances = emr.list_instances(
+            ClusterId=f"{cl}"
+        )
+        ec2_instance_ips_by_cl.append(cl)
+        ec2_by_cluster = []
 
-counter = 0
-ec2_instance_id_list = []  # this should be without _list
-try:
-    while True:
-        ec2_instance_id_list.append(response["Instances"][counter]["Ec2InstanceId"])
-        counter += 1
-except:
-    pass
-ec2_instance_id_last_4_chars = []
-for i in ec2_instance_id_list:
-    ec2_instance_id_last_4_chars.append(i[-4:])
+        for i in range(len(instances["Instances"])):
+            ec2_by_cluster.append(instances["Instances"][i]["PublicIpAddress"])
+
+            last_four_instanceId.append(instances["Instances"][i]["Ec2InstanceId"][-4:])
+
+        ec2_instance_ips_by_cl.append(ec2_by_cluster)
+        del ec2_by_cluster
+
+
+    return [ec2_instance_ips_by_cl, last_four_clusterId, last_four_instanceId]
+
 
 
 
         # TODO: you have to set the ec2 instance to allow you to ssh directly into root.
-command = "jps | grep 'Main' | tr -d [:alpha:]"
-    # "sudo",   # this depends on if the default user can 'see' the processes.
+
+# what do I need here? I need to return the pids
+SEARCH_TERM = 'Main'
+command = f"jps | grep '{SEARCH_TERM}' | tr -d [:alpha:]"
 
 
 
