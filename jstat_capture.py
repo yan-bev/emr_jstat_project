@@ -47,8 +47,6 @@ def cluster_id():
     for num_of_clusters in range(len(clusters["Clusters"])):
         cl_id.append(clusters["Clusters"][num_of_clusters]["Id"])  # every cluster id is logged.
     return cl_id
-
-
 def instance_ip():
     """
     gets all instance IPs and sorts them by list per cluster
@@ -68,7 +66,6 @@ def instance_ip():
             ec2s.append(instances["Instances"][i]["PublicIpAddress"])
 
     return ec2s
-
 def cluster_label():
     """
     returns the last four chars of every cluster in a list
@@ -79,35 +76,23 @@ def cluster_label():
     return last_four_chars_cluster
 
 
-def instance_label():
+def nested_instance_label():
     """
-    gives the last four digits of every instance ID.
-    :return:
+    gives the instances labels sorted by cluster
+    :return: [[], [], []]
     """
     emr = boto3.client('emr')  # set the boto3 variable
-    ec2_instances = []
+    ec2_label_by_cluster = []
     for cl in cluster_id():
         instances = emr.list_instances(
             ClusterId=f"{cl}"
         )
-
+        throwaway = []
         for i in range(len(instances["Instances"])):
-            ec2_instances.append(instances["Instances"][i]["Ec2InstanceId"][-4:])
-
-    return ec2_instances
-
-
-def list_breaker(jps_output):
-    """
-    this breaks the list up into a list of lists
-    """
-    res = []
-    for ind in jps_output:
-        for i in ind:
-            sub = i.split(b',')
-            res.append(sub)
-    return (res)
-
+            throwaway.append(instances["Instances"][i]["Ec2InstanceId"][-4:])
+        ec2_label_by_cluster.append(throwaway)
+        del throwaway
+    return ec2_label_by_cluster
 
 def jps_command():
     """
