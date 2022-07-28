@@ -3,7 +3,7 @@ import paramiko
 import time
 from filepath import KEYPATH
 PEM = KEYPATH
-
+SEARCH_TERM = 'Main'
 
 def nested_instance_ip():
     """
@@ -104,7 +104,6 @@ def jps_command():
     :return:
     lists within list [[[pid per instance per cluster]]]
     """
-    SEARCH_TERM = 'Main'
     command = f"jps | grep '{SEARCH_TERM}' | tr -d [:alpha:]"
     nested_ips = nested_instance_ip()
     clid = cluster_id()
