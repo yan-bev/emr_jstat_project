@@ -15,3 +15,6 @@ within *jstat_capture.py* `SEARCH_TERM` should be changed to reflect the desired
 within *grapher.py* and *extractor.py* the `CHANGE_PATH` variable should be changed to reflect the parent directory to which *extractor.py* writes to and *grapher.py* reads from.
 
 within *grapher.py* the `SAVE_PATH` variable should be changed to reflect the desired location to save the graph.png file.
+___
+### Graph Output
+(/graph/refined_jstat.png)
