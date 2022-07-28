@@ -1,9 +1,6 @@
 import boto3
 import paramiko
-import re
-import nums_from_string
 import time
-
 from filepath import KEYPATH
 PEM = KEYPATH
 
@@ -28,6 +25,7 @@ def nested_instance_ip():
         del throwout
     return ec2s
 
+
 def cluster_id():
     """
     gets all cluster IDs
@@ -47,6 +45,8 @@ def cluster_id():
     for num_of_clusters in range(len(clusters["Clusters"])):
         cl_id.append(clusters["Clusters"][num_of_clusters]["Id"])  # every cluster id is logged.
     return cl_id
+
+
 def instance_ip():
     """
     gets all instance IPs and sorts them by list per cluster
@@ -66,6 +66,8 @@ def instance_ip():
             ec2s.append(instances["Instances"][i]["PublicIpAddress"])
 
     return ec2s
+
+
 def cluster_label():
     """
     returns the last four chars of every cluster in a list
@@ -93,6 +95,7 @@ def nested_instance_label():
         ec2_label_by_cluster.append(throwaway)
         del throwaway
     return ec2_label_by_cluster
+
 
 def jps_command():
     """
@@ -149,22 +152,16 @@ def jps_command():
     return PIDs
 
 
-k = paramiko.RSAKey.from_private_key_file(f'{PEM}')
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-USERNAME = 'root'
-ips = nested_instance_ip()
-clusters = cluster_id()
+def jstat_starter():
+    k = paramiko.RSAKey.from_private_key_file(f'{PEM}')
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
+    USERNAME = 'root'
+    ips = nested_instance_ip()
+    clusters = cluster_id()
+    PIDs = jps_command()
 
-# ips = instance_ip()
-PIDs = jps_command()
-pid = ''
-jstat_command = f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 250 7'
-remote_destination = r'/tmp/jstat_output/jstat_{pid}'
-
-#
-if __name__ == '__main__':
     for cl in range(len(clusters)):
         for ip in range(len(ips[cl])):
             ssh.connect(
@@ -176,8 +173,10 @@ if __name__ == '__main__':
             )
 
             for pid in PIDs[cl][ip]:
-                stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)  # can you nest f'strings'?
-                print(pid)
+                stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
                 time.sleep(5)
+            ssh.close
 
-# after one hour, the function runs extractor.
+if __name__ == '__main__':
+    jstat_starter()
+

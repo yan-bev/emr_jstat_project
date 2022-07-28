@@ -19,7 +19,6 @@ PEM = KEYPATH
 CHANGE_PATH = r'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs'
 date = date.today()
 last_hour = datetime.now() - timedelta(hours=1)
-
 def extract_files():
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
@@ -74,6 +73,8 @@ def extract_files():
                         jstat.to_csv(final_dest, mode='a', index=False, header=False)
                     sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
 
-extract_files()
+
+if '__name__' == '__main__':
+    extract_files()
 
 # TODO: rerun jstat_capture in the background.

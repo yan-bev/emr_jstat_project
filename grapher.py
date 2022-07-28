@@ -1,11 +1,9 @@
+import os
+import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator
-import os
-import glob
 import matplotlib.dates as mdates
-
-
 
 CHANGE_PATH = r'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs'
 SAVE_PATH = 'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\graphs'
