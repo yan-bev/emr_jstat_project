@@ -1,4 +1,4 @@
-# ltered Jstat
+# Filtered Jstat
 Filtered Jstat graphs Old Storage, full garbage collection occurances, and full garbage collection time for all applicable Processes in all instances in all running EMR clusters. 
 
 ## Description
