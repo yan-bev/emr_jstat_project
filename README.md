@@ -17,4 +17,4 @@ within *grapher.py* and *extractor.py* the `CHANGE_PATH` variable should be chan
 within *grapher.py* the `SAVE_PATH` variable should be changed to reflect the desired location to save the graph.png file.
 ___
 ### Graph Output
-(/graph/refined_jstat.png)
+![expected output](/graph/refined_jstat.png)
