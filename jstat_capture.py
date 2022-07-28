@@ -176,6 +176,8 @@ if __name__ == '__main__':
             )
 
             for pid in PIDs[cl][ip]:
-                stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 250 7 > /tmp/jstat_output/jstat_{pid} &', timeout=1)  # can you nest f'strings'?
+                stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)  # can you nest f'strings'?
                 print(pid)
                 time.sleep(5)
+
+# after one hour, the function runs extractor.
