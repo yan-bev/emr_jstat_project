@@ -6,7 +6,7 @@ from matplotlib.dates import DayLocator
 import matplotlib.dates as mdates
 
 CHANGE_PATH = r'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs'
-SAVE_PATH = 'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\graphs'
+SAVE_PATH = 'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\graph'
 
 def file_finder(directory_path=CHANGE_PATH):
     """
