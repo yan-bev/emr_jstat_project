@@ -3,7 +3,7 @@ import paramiko
 import time
 from filepath import KEYPATH
 PEM = KEYPATH
-SEARCH_TERM = 'Main'
+
 
 def nested_instance_ip():
     """
@@ -37,7 +37,8 @@ def cluster_id():
     clusters = emr.list_clusters(
         ClusterStates=[
             'RUNNING',
-            'STARTING'
+            'STARTING',
+            'WAITING'
         ]
     )
 
@@ -104,7 +105,8 @@ def jps_command():
     :return:
     lists within list [[[pid per instance per cluster]]]
     """
-    command = f"jps | grep '{SEARCH_TERM}' | tr -d [:alpha:]"
+    SEARCH_TERM = 'Main'
+    command = f"sudo jps | grep '{SEARCH_TERM}' | tr -d [:alpha:]"
     nested_ips = nested_instance_ip()
     clid = cluster_id()
 
@@ -115,9 +117,8 @@ def jps_command():
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 
-    username = 'root'  # generally this should be ec2-user, but for me proccesses only worked with root.
+    username = 'ec2-user'
 
-    ips = instance_ip()
 
     pids_by_cluster = []
     for cl in range(len(clid)):
@@ -156,10 +157,11 @@ def jstat_starter():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    USERNAME = 'root'
+    USERNAME = 'ec2-user'
     ips = nested_instance_ip()
     clusters = cluster_id()
     PIDs = jps_command()
+
 
     for cl in range(len(clusters)):
         for ip in range(len(ips[cl])):
@@ -172,9 +174,10 @@ def jstat_starter():
             )
 
             for pid in PIDs[cl][ip]:
-                stdin, stdout, stderr = ssh.exec_command(f'mkdir -p /tmp/jstat_output && jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
+                print(ip, pid)
+                ssh.exec_command(f'mkdir -p /tmp/jstat_output && sudo jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
                 time.sleep(5)
-            ssh.close
+
 
 if __name__ == '__main__':
     jstat_starter()

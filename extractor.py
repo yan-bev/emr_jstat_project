@@ -14,7 +14,7 @@ from jstat_capture import jps_command
 
 from filepath import KEYPATH
 
-USERNAME = 'root'
+USERNAME = 'ec2-user'
 PEM = KEYPATH
 CHANGE_PATH = r'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs'
 date = date.today()
@@ -40,41 +40,37 @@ def extract_files():
 
     for cl in range(len(clusters)):
         for ip in range(len(ips[cl])):
-                ssh.connect(
+            ssh.connect(
                 hostname=f'{ips[cl][ip]}',
                 username=f'{USERNAME}',
                 pkey=k,
                 allow_agent=False,
                 look_for_keys=False
-            )
-                for pid in PIDs[cl][ip]:
-                    print(pid)
-                    sftp = ssh.open_sftp()
-                    readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
-                    readfile.prefetch()
-                    for line in readfile:
-                        line = line.split()
-                        liner = [(itemgetter(3, 8, 9)(line))]
+                )
+            for pid in PIDs[cl][ip]:
+                print(cl, ip, pid)
+                sftp = ssh.open_sftp()
+                readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
+                readfile.prefetch()
+                for line in readfile:
+                    line = line.split()
+                    liner = [(itemgetter(3, 8, 9)(line))]
 
-                        jstat = pd.DataFrame(liner)
+                    jstat = pd.DataFrame(liner)
 
-                        #TODO: this looks like a mistake, this should be the whole datetime
-                        # we can then have the xtick value be by hour... why not?
-                        # d1 = datetime.now() - timedelta(hours=1)
+                    d1 = datetime.now() - timedelta(hours=1)
+                    dtime = pd.to_datetime(d1)
+                    jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-                        d1 = datetime.now() - timedelta(hours=1)
-                        dtime = pd.to_datetime(d1)
-                        jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
-
-                        os.chdir(CHANGE_PATH)
-                        output_dir = Path(f"cluster_{last_four_cluster_chars[cl]}\\instance_{last_four_instance_chars[cl][ip]}\\")
-                        output_dir.mkdir(parents=True, exist_ok=True)
-                        final_dest = f"cluster_{last_four_cluster_chars[cl]}\instance_{last_four_instance_chars[cl][ip]}\jstat_{pid}.csv"
-                        jstat.to_csv(final_dest, mode='a', index=False, header=False)
-                    sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
+                    os.chdir(CHANGE_PATH)
+                    output_dir = Path(f"cluster_{last_four_cluster_chars[cl]}\\instance_{last_four_instance_chars[cl][ip]}\\")
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    final_dest = f"cluster_{last_four_cluster_chars[cl]}\instance_{last_four_instance_chars[cl][ip]}\jstat_{pid}.csv"
+                    jstat.to_csv(final_dest, mode='a', index=False, header=False)
+                sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
 
 
-if '__name__' == '__main__':
-    extract_files()
 
-# TODO: rerun jstat_capture in the background.
+# if '__name__' == '__main__':
+extract_files()
+
