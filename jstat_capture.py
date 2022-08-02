@@ -4,6 +4,63 @@ import time
 from filepath import KEYPATH
 PEM = KEYPATH
 
+def cluster_id():
+    """
+    gets all cluster IDs
+    :return: list
+    """
+    emr = boto3.client('emr')  # set the boto3 variable
+
+    # check for all running clusters
+    clusters = emr.list_clusters(
+        ClusterStates=[
+            'RUNNING',
+            'STARTING',
+            'WAITING'
+        ]
+    )
+
+    cl_id = []
+    for num, cluster in enumerate(clusters["Clusters"]):
+        cl_id.append(clusters["Clusters"][num]["Id"])  # every cluster id is logged.
+    # for i, cl in enumerate(cl_id):
+    # print({k:v for k, v in enumerate(cl_id)})
+    cl_menu = []
+    for i, cl in enumerate(cl_id):
+        cl_menu.append(str(f'{i + 1}: {cl}'))
+    return cl_menu
+
+def choose_clusters(clusters=cluster_id()):
+    print(clusters)
+    cl_checks = []
+    choice = int(input("Choose a Cluster number to start Jstat, to exit press 0\n"))
+    while choice != 0:
+        cl_checks.append(clusters[choice - 1][3::])
+        print(f'you chose: {cl_checks}')
+        print(clusters)
+        choice = int(input("choose an additional cluster? if not desired, enter '0' to exit\n"))
+    return cl_checks
+
+
+def instance_ip():
+    """
+    gets all instance IPs and sorts them by list per cluster
+    []
+    :return: list
+    """
+    emr = boto3.client('emr')  # set the boto3 variable
+
+    ec2s = []
+    for cl in choose_clusters():
+        instances = emr.list_instances(
+            ClusterId=f"{cl}"
+        )
+
+        for i, _ in enumerate(instances["Instances"]):
+            ec2s.append(instances["Instances"][i]["PublicIpAddress"])
+    return ec2s
+print(instance_ip())
+
 
 def nested_instance_ip():
     """
@@ -23,49 +80,6 @@ def nested_instance_ip():
             throwout.append(instances["Instances"][i]["PublicIpAddress"])
         ec2s.append(throwout)
         del throwout
-    return ec2s
-
-
-def cluster_id():
-    """
-    gets all cluster IDs
-    :return: list
-    """
-    emr = boto3.client('emr')  # set the boto3 variable
-
-    # check for all running clusters
-    clusters = emr.list_clusters(
-        ClusterStates=[
-            'RUNNING',
-            'STARTING',
-            'WAITING'
-        ]
-    )
-
-    cl_id = []
-    for num_of_clusters in range(len(clusters["Clusters"])):
-        cl_id.append(clusters["Clusters"][num_of_clusters]["Id"])  # every cluster id is logged.
-    return cl_id
-
-
-def instance_ip():
-    """
-    gets all instance IPs and sorts them by list per cluster
-    []
-    :return: list
-    """
-    emr = boto3.client('emr')  # set the boto3 variable
-
-    ec2s = []
-    for cl in cluster_id():
-        global instances
-        instances = emr.list_instances(
-            ClusterId=f"{cl}"
-        )
-
-        for i in range(len(instances["Instances"])):
-            ec2s.append(instances["Instances"][i]["PublicIpAddress"])
-
     return ec2s
 
 

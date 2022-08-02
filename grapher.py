@@ -88,7 +88,7 @@ def grapher():
     :return: a pdf file
     """
 
-    hours = mdates.HourLocator(interval=4) # every 4 hours
+    hours = mdates.HourLocator(interval=4)# every 4 hours
     h_fmt = mdates.DateFormatter('%H')
 
     ax1.xaxis.set_major_locator(DayLocator())
