@@ -21,15 +21,15 @@ def populate_node_ip(path=bash_script_path):
     os.chmod(path=path, mode=0o755) #changes mode to exec
     subprocess.call(path)  # runs the exec
 
+
 def node_ips(filepath=FILEPATH):
     populate_node_ip() # populates the ip_text_path.txt file
     ip_list = open(filepath).read().splitlines()
     ip_list = set(ip_list)
     ip_list = (list(ip_list))
-    os.remove(filepath)
     return ip_list
 
-print(node_ips())
+# print(node_ips())
 
 def jps_command(ip_list=node_ips(), username=USERNAME ):
     """

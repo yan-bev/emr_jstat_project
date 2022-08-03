@@ -44,9 +44,6 @@ def extract_files(ips=ips, username=USERNAME, key_file=PEM, pids=pids, ec2_label
     :return:
     """
 
-    # last_four_instance_chars = nested_instance_label()
-
-
     k = paramiko.RSAKey.from_private_key_file(f'{key_file}')
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
