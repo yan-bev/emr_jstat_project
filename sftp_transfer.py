@@ -2,15 +2,13 @@ import boto3
 import paramiko
 
 from config import remote_pem_path
-from config import USER
+from config import user
 from config import local_pem_path
 
 REMOTE_PATH = remote_pem_path
 PEM = local_pem_path
-USERNAME = USER
+USERNAME = user
 
-#
-# PEM = KEYPATH
 
 
 def cluster_menu():

@@ -29,6 +29,8 @@ def node_ips(filepath=FILEPATH):
     os.remove(filepath)
     return ip_list
 
+print(node_ips())
+
 def jps_command(ip_list=node_ips(), username=USERNAME ):
     """
     returns the jps output for the requested search-term for each instance in each cluster
