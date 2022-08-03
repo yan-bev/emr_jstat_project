@@ -91,7 +91,7 @@ def grapher():
     :return: a pdf file
     """
 
-    hours = mdates.HourLocator(interval=4)# every 4 hours
+    hours = mdates.HourLocator(byhour=[0, 6], interval=6)# every 4 hours
     h_fmt = mdates.DateFormatter('%H')
 
     ax1.xaxis.set_major_locator(DayLocator())
@@ -119,8 +119,11 @@ if __name__ == '__main__':
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True)
     for count, one_filename in enumerate(file_finder()):
         split_filename = (one_filename.split('/'))
+        print('split files')
         perpare_csv()
+        print('csv perpared')
         plotter()
+        print('plot finished')
     grapher()
-
+    print('graphed')
 
