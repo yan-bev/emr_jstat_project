@@ -69,8 +69,6 @@ def jps_command(ip_list=node_ips(), username=USERNAME ):
         del throw
     return PIDs
 
-print(jps_command())
-
 
 def jstat_starter(ip_list=node_ips(), PIDs=jps_command()):
     k = paramiko.RSAKey.from_private_key_file(f'{PEM}')

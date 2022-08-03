@@ -18,11 +18,10 @@ PEM = remote_pem_path
 
 pids = jps_command()
 
-ips = node_ips()
 CHANGE_PATH = master_directory_path_for_df_save
 
 
-def ec2_worker_label(ips=ips):
+def ec2_worker_label(ips=node_ips()):
     s = []
     for ip in ips:
         throwaway = []
@@ -36,7 +35,7 @@ def ec2_worker_label(ips=ips):
     return ec2_label
 
 
-def extract_files(ips=ips, username=USERNAME, key_file=PEM, pids=pids, ec2_label=ec2_worker_label()):
+def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec2_label=ec2_worker_label()):
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
      to a local folder as a csv. the files are saved in the following path
@@ -48,8 +47,9 @@ def extract_files(ips=ips, username=USERNAME, key_file=PEM, pids=pids, ec2_label
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-
+    print('hi there')
     for i, ip in enumerate(ips):
+        print(ip)
         ssh.connect(
             hostname=ip,
             username=username,
