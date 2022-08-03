@@ -1,12 +1,12 @@
 import boto3
 import paramiko
 
-from config import PEM_PATH
+from config import remote_pem_path
 from config import USER
-from config import REMOTE_PATH
+from config import local_pem_path
 
-
-PEM = PEM_PATH
+REMOTE_PATH = remote_pem_path
+PEM = local_pem_path
 USERNAME = USER
 
 #
