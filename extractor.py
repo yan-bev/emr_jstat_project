@@ -19,6 +19,7 @@ PEM = remote_pem_path
 pids = jps_command()
 
 CHANGE_PATH = master_directory_path_for_df_save
+print('hi')
 
 
 def ec2_worker_label(ips=node_ips()):
@@ -80,7 +81,5 @@ def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec
             sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
 
 
-
-if '__name__' == '__main__':
-    extract_files()
+print(extract_files())
 
