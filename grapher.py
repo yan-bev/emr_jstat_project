@@ -16,8 +16,8 @@ def file_finder(directory_path=CHANGE_PATH):
     :param directory_path:
     :return: list of filepaths
     """
-    file_search = 'instance_*/jstat_*.csv'
-    finder = glob.glob(file_search, root_dir=CHANGE_PATH, recursive=True)
+    file_search = '/tmp/jstat_output/instance_*/jstat_*.csv'
+    finder = glob.glob(file_search, recursive=True)
     return(finder)
 
 def perpare_csv():
