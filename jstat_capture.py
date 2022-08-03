@@ -9,16 +9,19 @@ from config import search_term
 from config import remote_pem_path
 from config import bash_script_path
 from config import ip_text_path
+from config import user
+
 
 PEM = remote_pem_path
 filepath = ip_text_path
+username = user
 
 
 def get_slave_node_ip(path=bash_script_path):
     os.chmod(path=path, mode=0o755)
     subprocess.call(path)
 
-def jps_command(filepath=ip_text_path, ):
+def jps_command(filepath=ip_text_path, username=username ):
     """
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present PID.
@@ -53,22 +56,17 @@ def jps_command(filepath=ip_text_path, ):
         standard_jps_output.append(stdout.read())
         ssh.close()
 
-    return(standard_jps_output)
+    PIDs = []
+    for j, pid in enumerate(standard_jps_output):
+        # throw = []
+        throw = pid.decode("utf-8").replace('\n', '').strip().split()
+        PIDs.append(throw)
+        del throw
+    return PIDs
+
 print(jps_command())
 
-#     PIDs = []
-#     for j in range(len(pids_by_cluster)):
-#         throw = []
-#         for i in pids_by_cluster[j]:
-#             oof = i.decode("utf-8")
-#             oof = oof.replace('\n', '').strip().split()
-#             throw.append((oof))
-#         PIDs.append(throw)
-#         del throw
-#
-#     return PIDs
-#
-#
+
 # def jstat_starter():
 #     k = paramiko.RSAKey.from_private_key_file(f'{PEM}')
 #     ssh = paramiko.SSHClient()
