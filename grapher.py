@@ -118,6 +118,7 @@ if __name__ == '__main__':
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True)
     for count, one_filename in enumerate(file_finder()):
         split_filename = (one_filename.split('\\'))
+        print(split_filename)
         perpare_csv()
         plotter()
     grapher()
