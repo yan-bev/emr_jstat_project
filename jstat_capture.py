@@ -1,3 +1,5 @@
+# (b'ip-172-31-80-219.ec2.internal\n', None)
+
 import subprocess
 import paramiko
 import time
@@ -43,7 +45,7 @@ def jps_command(ips=get_slave_node_ip()):
         stdin, stdout, stderr = ssh.exec_command(command)
         standard_jps_output.append(stdout.read())
         ssh.close()
-# 
+#
 #     PIDs = []
 #     for j in range(len(pids_by_cluster)):
 #         throw = []
