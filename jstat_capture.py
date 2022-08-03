@@ -2,20 +2,23 @@
 
 import subprocess
 import paramiko
+import os
 import time
 
 from config import search_term
 from config import remote_pem_path
+from config import bash_script_path
 
 PEM = remote_pem_path
 
 
-def get_slave_node_ip():
-    command = "yarn node -list 2> /dev/null | grep internal | cut -d' ' -f1 | cut -d: -f1"
-    slave_ips = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    return slave_ips
+def get_slave_node_ip(path=bash_script_path):
+    os.chmod(path=path, mode=0o755)
+    subprocess.call(path)
+    print('done')
+print(get_slave_node_ip())
 
-def jps_command(ips=get_slave_node_ip()):
+def jps_command(ips):
     """
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present PID.
