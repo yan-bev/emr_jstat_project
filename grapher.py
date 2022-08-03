@@ -114,7 +114,7 @@ def grapher():
     fig.savefig('refined_jstat.png', bbox_inches='tight')
 
 if __name__ == '__main__':
-    os.chdir(CHANGE_PATH)
+    print('hi')
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True)
     for count, one_filename in enumerate(file_finder()):
         split_filename = (one_filename.split('\\'))
