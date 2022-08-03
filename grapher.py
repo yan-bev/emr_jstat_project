@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator
 import matplotlib.dates as mdates
+from matplotlib.ticker import AutoMinorLocator
 
 from config import graph_save_location
 from config import master_directory_path_for_df_save
@@ -91,7 +92,7 @@ def grapher():
     :return: a pdf file
     """
 
-    hours = mdates.HourLocator(byhour=[0, 6])  # every 6 hours
+    # hours = mdates.HourLocator(byhour=[0, 6])  # every 6 hours
     h_fmt = mdates.DateFormatter('%H')
 
     ax1.xaxis.set_major_locator(DayLocator())
@@ -99,11 +100,12 @@ def grapher():
     ax2.tick_params(axis='x', direction='out', length=5, width=1, grid_alpha=0.5)
     ax3.tick_params(axis='x', direction='out', length=8, width=1, grid_alpha=0.5)
 
-    ax1.xaxis.set_minor_locator(hours)
-    ax1.xaxis.set_minor_formatter(h_fmt)
+    ax3.get_shared_x_axes().join(ax1, ax2, ax3)
+    ax3.xaxis.set_minor_locator(AutoMinorLocator(n=4))
+    ax3.xaxis.set_minor_formatter(h_fmt)
     fig.suptitle("Refined Jstat")
-    plt.setp(ax1.get_xticklabels(), visable=False)
-    plt.setp(ax2.get_xticklabels(), visable=False)
+    # plt.setp(ax1.get_xticklabels(), visable=False)
+    # plt.setp(ax2.get_xticklabels(), visable=False)
     plt.subplots_adjust(left=0.11,
                         hspace=0.343)
 
