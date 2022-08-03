@@ -75,11 +75,9 @@ def extract_files(ips=ips, username=USERNAME, key_file=PEM, pids=pids, ec2_label
                 dtime = pd.to_datetime(d1)
                 jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-                if not os.path.exists(CHANGE_PATH):
-                    os.makedirs(CHANGE_PATH)
-                    print('path changed to:')
-                output_dir = Path(f"instance_{ec2_label[i]}")
+                output_dir = Path(f"{CHANGE_PATH}/instance_{ec2_label[i]}")
                 output_dir.mkdir(parents=True, exist_ok=True)
+                os.chdir(CHANGE_PATH)
                 final_dest = f"instance_{ec2_label[i]}/jstat_{pid}.csv"
                 jstat.to_csv(final_dest, mode='a', index=False, header=False)
             sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
