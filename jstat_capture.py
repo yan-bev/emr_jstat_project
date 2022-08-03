@@ -13,25 +13,29 @@ from config import user
 
 
 PEM = remote_pem_path
-filepath = ip_text_path
-username = user
+FILEPATH = ip_text_path
+USERNAME = user
 
 
-def get_slave_node_ip(path=bash_script_path):
-    os.chmod(path=path, mode=0o755)
-    subprocess.call(path)
+def populate_node_ip(path=bash_script_path):
+    os.chmod(path=path, mode=0o755) #changes mode to exec
+    subprocess.call(path)  # runs the exec
 
-def jps_command(filepath=ip_text_path, username=username ):
+def node_ips(filepath=FILEPATH):
+    populate_node_ip() # populates the ip_text_path.txt file
+    ip_list = open(filepath).read().splitlines()
+    ip_list = set(ip_list)
+    ip_list = (list(ip_list))
+    os.remove(filepath)
+    return ip_list
+
+def jps_command(ip_list=node_ips(), username=USERNAME ):
     """
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present PID.
     :return:
     lists within list [[pid per instance]]
     """
-    get_slave_node_ip() # populates the ip_text_path.txt file
-    ip_list = open(filepath).read().splitlines()
-    ip_list = set(ip_list)
-    ip_list = (list(ip_list))
 
     command = f"sudo jps | grep '{search_term}' | tr -d [:alpha:]"
 
@@ -41,13 +45,11 @@ def jps_command(filepath=ip_text_path, username=username ):
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 
-    username = 'ec2-user'
-
     standard_jps_output = []
     for ip in ip_list:
         ssh.connect(
             hostname=ip,
-            username=username,
+            username=USERNAME,
             pkey=k,
             allow_agent=False,
             look_for_keys=False
@@ -55,9 +57,10 @@ def jps_command(filepath=ip_text_path, username=username ):
         stdin, stdout, stderr = ssh.exec_command(command)
         standard_jps_output.append(stdout.read())
         ssh.close()
+        # print(standard_jps_output)
 
     PIDs = []
-    for j, pid in enumerate(standard_jps_output):
+    for pid in standard_jps_output:
         # throw = []
         throw = pid.decode("utf-8").replace('\n', '').strip().split()
         PIDs.append(throw)
@@ -67,33 +70,26 @@ def jps_command(filepath=ip_text_path, username=username ):
 print(jps_command())
 
 
-# def jstat_starter():
-#     k = paramiko.RSAKey.from_private_key_file(f'{PEM}')
-#     ssh = paramiko.SSHClient()
-#     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#
-#     USERNAME = 'ec2-user'
-#     ips = nested_instance_ip()
-#     clusters = cluster_id()
-#     PIDs = jps_command()
-#
-#
-#     for cl in range(len(clusters)):
-#         for ip in range(len(ips[cl])):
-#             ssh.connect(
-#                 hostname=f'{ips[cl][ip]}',
-#                 username=USERNAME,
-#                 pkey=k,
-#                 allow_agent=False,
-#                 look_for_keys=False
-#             )
-#
-#             for pid in PIDs[cl][ip]:
-#                 print(ip, pid)
-#                 ssh.exec_command(f'mkdir -p /tmp/jstat_output && sudo jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
-#                 time.sleep(5)
-#
-#
-# if __name__ == '__main__':
-#     jstat_starter()
-#
+def jstat_starter(ip_list=node_ips(), PIDs=jps_command()):
+    k = paramiko.RSAKey.from_private_key_file(f'{PEM}')
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    for i, ip in enumerate(ip_list):
+        ssh.connect(
+            hostname=f'{ip}',
+            username=USERNAME,
+            pkey=k,
+            allow_agent=False,
+            look_for_keys=False
+        )
+
+        for pid in PIDs[i]:
+            print(ip, pid)
+            ssh.exec_command(f'mkdir -p /tmp/jstat_output && sudo jstat -gcutil {pid} 10000 > /tmp/jstat_output/jstat_{pid} &', timeout=1)
+            time.sleep(5)
+
+
+if __name__ == '__main__':
+    jstat_starter()
+
