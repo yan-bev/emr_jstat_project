@@ -8,23 +8,27 @@ import time
 from config import search_term
 from config import remote_pem_path
 from config import bash_script_path
+from config import ip_text_path
 
 PEM = remote_pem_path
+filepath = ip_text_path
 
 
 def get_slave_node_ip(path=bash_script_path):
     os.chmod(path=path, mode=0o755)
     subprocess.call(path)
-    print('done')
-print(get_slave_node_ip())
 
-def jps_command(ips):
+def jps_command(filepath=ip_text_path, ):
     """
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present PID.
     :return:
     lists within list [[pid per instance]]
     """
+    get_slave_node_ip() # populates the ip_text_path.txt file
+    ip_list = open(filepath).read().splitlines()
+    ip_list = set(ip_list)
+    ip_list = (list(ip_list))
 
     command = f"sudo jps | grep '{search_term}' | tr -d [:alpha:]"
 
@@ -37,7 +41,7 @@ def jps_command(ips):
     username = 'ec2-user'
 
     standard_jps_output = []
-    for ip in ips:
+    for ip in ip_list:
         ssh.connect(
             hostname=ip,
             username=username,
@@ -48,7 +52,10 @@ def jps_command(ips):
         stdin, stdout, stderr = ssh.exec_command(command)
         standard_jps_output.append(stdout.read())
         ssh.close()
-#
+
+    return(standard_jps_output)
+print(jps_command())
+
 #     PIDs = []
 #     for j in range(len(pids_by_cluster)):
 #         throw = []
