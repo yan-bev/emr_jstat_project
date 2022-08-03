@@ -16,7 +16,7 @@ def file_finder(directory_path=CHANGE_PATH):
     :param directory_path:
     :return: list of filepaths
     """
-    file_search = r'cluster_*\instance_*\jstat_*.csv'
+    file_search = 'instance_*/jstat_*.csv'
     finder = glob.glob(file_search, root_dir=CHANGE_PATH, recursive=True)
     return(finder)
 
