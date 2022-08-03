@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator
 import matplotlib.dates as mdates
 
-CHANGE_PATH = r'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\jstat_outputs'
-SAVE_PATH = 'C:\\Users\yaniv\Documents\get-a-job\projects\emr_jstat\graph'
+from config import graph_save_location
+from config import master_directory_path_for_df_save
 
+CHANGE_PATH = master_directory_path_for_df_save
+SAVE_PATH = graph_save_location
 def file_finder(directory_path=CHANGE_PATH):
     """
     based on a search parameter returns all matching files.
@@ -76,7 +78,7 @@ def plotter():
 
    # plot the FGCT Average
     ax3.plot(df.DateTime, df.FGCTFGC, marker='.',
-             label=f'{split_filename[0][-4:]}_{split_filename[1][-4:]}_{split_filename[2][-8:-4]}')
+             label=f'{split_filename[1][-4:]}_{split_filename[2][-8:-4]}')
     ax3.legend(bbox_to_anchor=(0.5, -0.5), fontsize=7, loc='upper center', ncol=2)
     ax3.set_title('FGCT Average').set_size(10)
     ax3.set_xlabel('hour')

@@ -19,7 +19,6 @@ PEM = remote_pem_path
 pids = jps_command()
 
 CHANGE_PATH = master_directory_path_for_df_save
-print('hi')
 
 
 def ec2_worker_label(ips=node_ips()):
@@ -48,9 +47,9 @@ def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    print('hi there')
+
     for i, ip in enumerate(ips):
-        print(ip)
+
         ssh.connect(
             hostname=ip,
             username=username,
@@ -59,7 +58,6 @@ def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec
             look_for_keys=False
             )
         for pid in pids[i]:
-            print(ip, pid)
             sftp = ssh.open_sftp()
             readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
             readfile.prefetch()
