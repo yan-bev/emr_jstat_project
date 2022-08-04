@@ -18,7 +18,7 @@ USERNAME = user
 
 
 def populate_node_ip(path=bash_script_path):
-    os.chmod(path=path, mode=0o755) #changes mode to exec
+    os.chmod(path=path, mode=0o755) # changes mode to exec
     subprocess.call(path)  # runs the exec
 
 

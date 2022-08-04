@@ -1,3 +1,4 @@
+import boto3
 import os
 import glob
 import pandas as pd
@@ -6,11 +7,13 @@ from matplotlib.dates import DayLocator
 import matplotlib.dates as mdates
 from matplotlib.ticker import AutoMinorLocator
 
-from config import graph_save_location
+from config import graph_parent_save_location
 from config import master_directory_path_for_df_save
+from config import full_graph_save_path
 
 CHANGE_PATH = master_directory_path_for_df_save
-SAVE_PATH = graph_save_location
+SAVE_PATH = graph_parent_save_location
+FULL_SAVE = full_graph_save_path
 
 def file_finder(directory_path=CHANGE_PATH):
     """
@@ -96,8 +99,8 @@ def grapher():
     h_fmt = mdates.DateFormatter('%H')
 
     ax1.xaxis.set_major_locator(DayLocator())
-    ax1.tick_params(axis='x', direction='out', length=5, width=1, grid_alpha=0.5)
-    ax2.tick_params(axis='x', direction='out', length=5, width=1, grid_alpha=0.5)
+    ax1.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
+    ax2.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
     ax3.tick_params(axis='x', direction='out', length=8, width=1, grid_alpha=0.5)
 
     ax3.get_shared_x_axes().join(ax1, ax2, ax3)
@@ -114,11 +117,22 @@ def grapher():
     else:
         os.mkdir(SAVE_PATH)
         os.chdir(SAVE_PATH)
+    fig.legend(bbox_transfrom=fig.transFigure)
     fig.savefig('refined_jstat.png', bbox_inches='tight')
+
+def s3_sender(s3_bucket):
+    s3 = boto3.client('s3')
+    s3.put_object(
+        ACL='private',
+        Body=FULL_SAVE,
+        Bucket='emr-graph-test-002',
+        Key="refined_jstat.png"
+    )
+
 
 if __name__ == '__main__':
     os.chdir(CHANGE_PATH)
-    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1) #sharex=True
     for count, one_filename in enumerate(file_finder()):
         split_filename = (one_filename.split('/'))
         print('split files')
@@ -128,4 +142,7 @@ if __name__ == '__main__':
         print('plot finished')
     grapher()
     print('graphed')
-
+    s3_sender()
+    print('object sent')
+    #TODO: Fix Legend - added fig.legend (bbox_inches causing problem)
+    #TODO: create .sh file and add here!

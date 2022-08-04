@@ -59,7 +59,10 @@ def master_ip(cluster=choose_clusters()):
             ClusterId=cl,
             InstanceGroupTypes=['MASTER']
         )
-        master_ip.append(master_ips["Instances"][0]["PublicIpAddress"])
+        try:
+            master_ip.append(master_ips["Instances"][0]["PublicIpAddress"])
+        except KeyError:
+            print('ec2 not yet running')
     return master_ip
 
 
