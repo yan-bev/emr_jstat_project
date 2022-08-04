@@ -123,12 +123,11 @@ def grapher():
     fig.savefig('refined_jstat.png', bbox_inches='tight')
 
 def s3_sender(s3_bucket=s3_b):
-    s3 = boto3.client('s3')
-    s3.put_object(
-        ACL='private',
-        Body=FULL_SAVE,
-        Bucket=s3_bucket,
-        Key="refined_jstat.png"
+    s3 = boto3.resource('s3')
+    s3.meta.client.upload_file(
+        FULL_SAVE,  # file location
+        s3_bucket,  # s3 bucket name
+        "refined_jstat.png"  # object name
     )
 
 
