@@ -125,7 +125,7 @@ def grapher():
 def s3_sender(s3_bucket=s3_b):
     s3 = boto3.client('s3')
     s3.put_object(
-        ACL='public',
+        ACL='private',
         Body=FULL_SAVE,
         Bucket=s3_bucket,
         Key="refined_jstat.png"
