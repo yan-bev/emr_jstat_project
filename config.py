@@ -8,7 +8,7 @@ master_directory_path_for_df_save = '/tmp/jstat_output'
 
 
 graph_parent_save_location = '/home/ec2-user/graph'
-full_graph_save_path = 'home/ec2-user/graph/refined_jstat.png'
+full_graph_save_path = '/home/ec2-user/graph/refined_jstat.png'
 
 
 
