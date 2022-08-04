@@ -10,7 +10,9 @@ from matplotlib.ticker import AutoMinorLocator
 from config import graph_parent_save_location
 from config import master_directory_path_for_df_save
 from config import full_graph_save_path
+from config import s3_bucket_name
 
+s3_b = s3_bucket_name
 CHANGE_PATH = master_directory_path_for_df_save
 SAVE_PATH = graph_parent_save_location
 FULL_SAVE = full_graph_save_path
@@ -120,12 +122,12 @@ def grapher():
     fig.legend(bbox_transform=fig.transFigure)
     fig.savefig('refined_jstat.png', bbox_inches='tight')
 
-def s3_sender(s3_bucket):
+def s3_sender(s3_bucket=s3_b):
     s3 = boto3.client('s3')
     s3.put_object(
         ACL='private',
         Body=FULL_SAVE,
-        Bucket='emr-graph-test-002',
+        Bucket=s3_bucket,
         Key="refined_jstat.png"
     )
 

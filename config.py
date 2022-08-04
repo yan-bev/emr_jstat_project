@@ -12,4 +12,4 @@ full_graph_save_path = 'home/ec2-user/graph/refined_jstat.png'
 
 
 
-s3_bucket_name = '<copy from s3>'
+s3_bucket_name = 'emr-graph-test-002'
