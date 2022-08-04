@@ -117,7 +117,7 @@ def grapher():
     else:
         os.mkdir(SAVE_PATH)
         os.chdir(SAVE_PATH)
-    fig.legend(bbox_transfrom=fig.transFigure)
+    fig.legend(bbox_transform=fig.transFigure)
     fig.savefig('refined_jstat.png', bbox_inches='tight')
 
 def s3_sender(s3_bucket):
