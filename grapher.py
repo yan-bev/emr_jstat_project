@@ -109,8 +109,8 @@ def grapher():
     ax3.xaxis.set_minor_locator(AutoMinorLocator(n=4))
     ax3.xaxis.set_minor_formatter(h_fmt)
     fig.suptitle("Refined Jstat")
-    # plt.setp(ax1.get_xticklabels(), visable=False)
-    # plt.setp(ax2.get_xticklabels(), visable=False)
+    plt.setp(ax1.get_xticklabels(), visable=False)
+    plt.setp(ax2.get_xticklabels(), visable=False)
     plt.subplots_adjust(left=0.11,
                         hspace=0.343)
 
