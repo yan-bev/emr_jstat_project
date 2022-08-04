@@ -86,7 +86,7 @@ def plotter():
    # plot the FGCT Average
     ax3.plot(df.DateTime, df.FGCTFGC, marker='.',
              label=f'{split_filename[0][-4:]}_{split_filename[1][-8:-4]}')
-    ax3.legend(bbox_to_anchor=(0.5, -0.5), fontsize=7, loc='upper center', ncol=2)
+    # ax3.legend(bbox_to_anchor=(0.5, -0.5), fontsize=7, loc='upper center', ncol=2)
     ax3.set_title('FGCT Average').set_size(10)
     ax3.set_xlabel('hour')
     ax3.set_ylabel('FGCT average (s)')
@@ -97,30 +97,39 @@ def grapher():
     :return: a pdf file
     """
 
-    # hours = mdates.HourLocator(byhour=[0, 6])  # every 6 hours
-    h_fmt = mdates.DateFormatter('%H')
-
-    ax1.xaxis.set_major_locator(DayLocator())
+    # ax1.xaxis.set_major_locator(DayLocator())
     ax1.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
     ax2.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
     ax3.tick_params(axis='x', direction='out', length=8, width=1, grid_alpha=0.5)
 
-    ax3.get_shared_x_axes().join(ax1, ax2, ax3)
-    ax3.xaxis.set_minor_locator(AutoMinorLocator(n=4))
-    ax3.xaxis.set_minor_formatter(h_fmt)
     fig.suptitle("Refined Jstat")
-    plt.setp(ax1.get_xticklabels(), visable=False)
-    plt.setp(ax2.get_xticklabels(), visable=False)
     plt.subplots_adjust(left=0.11,
                         hspace=0.343)
+
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+
+    hours = mdates.HourLocator(interval=6)
+    h_fmt = mdates.DateFormatter('%H')
+
+    ax1.xaxis.set_minor_locator(hours)
+    ax1.xaxis.set_minor_formatter(h_fmt)
+    plt.setp(ax1.xaxis.get_minorticklabels())
+
+
 
     if os.path.exists(SAVE_PATH):
         os.chdir(SAVE_PATH)
     else:
         os.mkdir(SAVE_PATH)
         os.chdir(SAVE_PATH)
-    fig.legend(bbox_transform=fig.transFigure)
-    fig.savefig('refined_jstat.png', bbox_inches='tight')
+
+    axbox = ax3.get_position()
+    fig.legend(loc='lower center', ncol=2,
+               bbox_to_anchor=[0, axbox.y0 - 0.1, 1, 1],
+               bbox_transform=fig.transFigure)
+
+    fig.savefig('refined_jstat.png')
 
 def s3_sender(s3_bucket=s3_b):
     s3 = boto3.resource('s3')
@@ -133,7 +142,7 @@ def s3_sender(s3_bucket=s3_b):
 
 if __name__ == '__main__':
     os.chdir(CHANGE_PATH)
-    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1) #sharex=True
+    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True, figsize=(16,10))
     for count, one_filename in enumerate(file_finder()):
         split_filename = (one_filename.split('/'))
         print('split files')
@@ -146,4 +155,3 @@ if __name__ == '__main__':
     s3_sender()
     print('object sent')
     #TODO: Fix Legend - added fig.legend (bbox_inches causing problem)
-    #TODO: create .sh file and add here!
