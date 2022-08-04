@@ -112,8 +112,8 @@ def grapher():
     hours = mdates.HourLocator(interval=6)
     h_fmt = mdates.DateFormatter('%H')
 
-    ax1.xaxis.set_minor_locator(hours)
-    ax1.xaxis.set_minor_formatter(h_fmt)
+    ax3.xaxis.set_minor_locator(hours)
+    ax3.xaxis.set_minor_formatter(h_fmt)
     plt.setp(ax1.xaxis.get_minorticklabels())
 
 
