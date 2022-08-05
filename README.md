@@ -20,10 +20,8 @@ ___
     `ssh -i <path_to_key> ec2-user@<MasterNode_PublicIP>`   
 4. install git:  
     `sudo yum install git`
-5. create directory to place emr_project:  
-    `mkdir emr_test && cd emr_test` 
-6. pull emr_project to Master Node:   
-    `git init && git pull https://github.com/yan-bev/emr_jstat_project`
+6. clone emr_project to Master Node:   
+    `git clone https://github.com/yan-bev/emr_jstat_project`
 7. install python modules:  
     `pip install paramiko pandas matplotlib boto3`
 8. (optional): create an s3 bucket to hold the graphs (required): replace `s3_bucket_name` in *config.py* with the desired s3 bucket. 
