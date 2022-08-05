@@ -48,10 +48,11 @@ def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=
         ssh.connect(
             hostname=ip,
             username=username,
-            pkey=key_file,
+            pkey=k,
             allow_agent=False,
             look_for_keys=False
             )
+
         for pid in pids[i]:
             sftp = ssh.open_sftp()
             readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
@@ -69,7 +70,7 @@ def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=
                 output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
                 output_dir.mkdir(parents=True, exist_ok=True)
                 os.chdir(csv_save)
-                final_dest = f'jstat_{pid}.csv'
+                final_dest = f'{output_dir}/jstat_{pid}.csv'
                 jstat.to_csv(final_dest, mode='a', index=False, header=False)
             sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
 

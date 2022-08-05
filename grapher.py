@@ -30,7 +30,10 @@ def perpare_csv():
     :return: dataframe
     """
     df = pd.read_csv(one_filename)
-    df.drop(df[df['O'] == 'O'].index, inplace=True)
+    try:
+        df.drop(df[df['O'] == 'O'].index, inplace=True)
+    except:
+        pass
     # cleans up the csv
     df = (df.iloc[1:])
     df.columns = ["DateTime", "O", "FGC", "FGCT"]
