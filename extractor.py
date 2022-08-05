@@ -6,20 +6,15 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 
-from config import master_directory_path_for_df_save
-from config import remote_pem_path
+from config import csv_save
+from config import master_key_path
 from config import user
 
 from jstat_capture import node_ips
 from jstat_capture import jps_command
 
-USERNAME = user
-PEM = remote_pem_path
 
 pids = jps_command()
-
-CHANGE_PATH = master_directory_path_for_df_save
-
 
 def ec2_worker_label(ips=node_ips()):
     s = []
@@ -35,7 +30,7 @@ def ec2_worker_label(ips=node_ips()):
     return ec2_label
 
 
-def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec2_label=ec2_worker_label()):
+def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=pids, ec2_label=ec2_worker_label()):
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
      to a local folder as a csv. the files are saved in the following path
@@ -53,7 +48,7 @@ def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec
         ssh.connect(
             hostname=ip,
             username=username,
-            pkey=k,
+            pkey=key_file,
             allow_agent=False,
             look_for_keys=False
             )
@@ -71,12 +66,12 @@ def extract_files(ips=node_ips(), username=USERNAME, key_file=PEM, pids=pids, ec
                 dtime = pd.to_datetime(d1)
                 jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-                output_dir = Path(f"{CHANGE_PATH}/instance_{ec2_label[i]}")
+                output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
                 output_dir.mkdir(parents=True, exist_ok=True)
-                os.chdir(CHANGE_PATH)
-                final_dest = f"instance_{ec2_label[i]}/jstat_{pid}.csv"
+                os.chdir(csv_save)
+                final_dest = f'jstat_{pid}.csv'
                 jstat.to_csv(final_dest, mode='a', index=False, header=False)
-            sftp.truncate(path=f'/tmp/jstat_output/jstat_{pid}', size=0)
+            sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
 
 
 print(extract_files())

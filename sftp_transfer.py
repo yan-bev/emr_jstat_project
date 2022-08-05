@@ -1,13 +1,9 @@
 import boto3
 import paramiko
 
-from config import remote_pem_path
+from config import master_key_path
 from config import user
-from config import local_pem_path
-
-REMOTE_PATH = remote_pem_path
-PEM = local_pem_path
-USERNAME = user
+from config import local_key_path
 
 
 
@@ -66,26 +62,26 @@ def master_ip(cluster=choose_clusters()):
     return master_ip
 
 
-def sftp_transfer(ip, username, PEM, REMOTE_PATH):
+def sftp_transfer(ips=master_ip(), username=user, PEM=local_key_path, REMOTE_PATH=master_key_path):
     '''
     Establishes ssh connect to execute commands
-    :param ip: list of ips to ssh into
+    :param ips: list of ips to ssh into
     :param username: username with which to log-in
     :param PEM: path to pem key
     :return: connection object
     '''
-    for address in ip:
+    for ip in ips:
         k = paramiko.RSAKey.from_private_key_file(PEM)
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(
-            hostname=address,
+            hostname=ip,
             username=username,
             pkey=k,
             allow_agent=False,
             look_for_keys=False
         )
-        print(f'connected to master: {address}')
+        print(f'connected to master: {ip}')
         try:
             sftp = ssh.open_sftp()
             sftp.put(localpath=PEM, remotepath=REMOTE_PATH, confirm=True)
@@ -98,5 +94,5 @@ def sftp_transfer(ip, username, PEM, REMOTE_PATH):
 
 
 if __name__ == '__main__':
-    sftp_transfer(ip=master_ip(), username=USERNAME, PEM=PEM, REMOTE_PATH=REMOTE_PATH)
+    sftp_transfer()
 

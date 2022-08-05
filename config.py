@@ -1,15 +1,27 @@
-local_pem_path = r'C:\\Users\yaniv\Documents\get-a-job\USeast1keypair.pem'
-remote_pem_path = '/home/ec2-user/USeast1keypair.pem'
-
-user = 'ec2-user'
-search_term = 'Main'
-bash_script_path = '/home/ec2-user/emr_test/get_ips.sh' # TODO: change name to emr-project
-
-ip_text_path = '/home/ec2-user/worker_ips.txt'
-master_directory_path_for_df_save = '/home/yaniv/get-a-job/emr_project/jstat_output'
-
-
-graph_parent_save_location = '/home/yaniv/get-a-job/emr_project/graph'
-full_graph_save_path = f'{graph_parent_save_location}/refined_jstat.png'
-
 s3_bucket_name = 'emr-graph-test-002'
+
+# the path to the pem key on the local machine
+local_key_path = r'C:\\Users\yaniv\Documents\get-a-job\USeast1keypair.pem'
+# the path to where the pe key should be saved on master
+master_key_path = '/home/ec2-user/USeast1keypair.pem'
+
+#user to be used for ssh
+user = 'ec2-user'
+# process search term to run jstat
+search_term = 'Main'
+parent_dir = '/home/ec2-user/emr_test'
+
+
+# the path to the bash script which pulls worker node ips
+bash_script_path = f'{parent_dir}/get_ips.sh'
+# the path to the text file containing worker node ips
+ip_text_path = f'{parent_dir}/worker_ips.txt'
+
+# path for csv and jstat output for master and worker nodes
+csv_save = '/tmp/jstat_output'
+
+# the directory where graph should be saved
+graph_dir = f'{parent_dir}/graph'
+# full path for graph
+graph_path = f'{graph_dir}/refined_jstat.png'
+

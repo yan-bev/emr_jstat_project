@@ -6,22 +6,18 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import AutoMinorLocator
 
-from config import graph_parent_save_location
-from config import master_directory_path_for_df_save
-from config import full_graph_save_path
+from config import graph_dir
+from config import csv_save
+from config import graph_path
 from config import s3_bucket_name
 
-s3_b = s3_bucket_name
-CHANGE_PATH = master_directory_path_for_df_save
-SAVE_PATH = graph_parent_save_location
-FULL_SAVE = full_graph_save_path
 
-def file_finder(directory_path=CHANGE_PATH):
+def file_finder(change_path=csv_save):
     """
     based on a search parameter returns all matching files.
-    :param directory_path:
     :return: list of filepaths
     """
+    os.chdir(change_path)
     file_search = 'instance_*/jstat_*.csv'
     finder = glob.glob(file_search, recursive=True)
     return(finder)
@@ -109,7 +105,6 @@ def grapher():
     hours = mdates.HourLocator(interval=4)
     h_fmt = mdates.DateFormatter('%H')
 
-    # ax3.xaxis.set_minor_locator(hours)
     minor_locator = AutoMinorLocator(n=3)
     ax3.xaxis.set_minor_locator(minor_locator)
     ax3.xaxis.set_minor_formatter(h_fmt)
@@ -117,11 +112,11 @@ def grapher():
 
 
 
-    if os.path.exists(SAVE_PATH):
-        os.chdir(SAVE_PATH)
+    if os.path.exists(graph_dir):
+        os.chdir(graph_dir)
     else:
-        os.mkdir(SAVE_PATH)
-        os.chdir(SAVE_PATH)
+        os.mkdir(graph_dir)
+        os.chdir(graph_dir)
 
     # layout
     axbox = ax3.get_position()
@@ -135,22 +130,24 @@ def grapher():
     fig.savefig('refined_jstat.png')
 
 
-def s3_sender(s3_bucket=s3_b):
+def s3_sender(s3_bucket=s3_bucket_name, graph_loc=graph_path):
     s3 = boto3.resource('s3')
     s3.meta.client.upload_file(
-        FULL_SAVE,  # file location
+        graph_loc,  # file location
         s3_bucket,  # s3 bucket name
         "refined_jstat.png"  # object name
     )
 
 
 if __name__ == '__main__':
-    os.chdir(CHANGE_PATH)
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True, figsize=(16,10))
     for one_filename in file_finder():
         split_filename = (one_filename.split('/'))
         perpare_csv()
         plotter()
     grapher()
-    s3_sender()
-    print(f'file sent to {s3_b}')
+    try:
+        s3_sender()
+        print(f'file sent to {s3_bucket_name}')
+    except:
+        print('file transfer failed')

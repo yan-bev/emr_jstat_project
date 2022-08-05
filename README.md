@@ -1,20 +1,37 @@
 # Filtered Jstat
-Filtered Jstat graphs Old Storage, full garbage collection occurances, and full garbage collection time for all applicable Processes in all instances in all running EMR clusters. 
+Filtered Jstat graphs old storage percentage, full garbage collection occurances, and full garbage collection time for all applicable processes in all instances in the desired EMR Cluster. 
 
 ## Description
-*Main.py* runs jstat_starter, sleeps for one hour and extracts the jstat output from each instance in an endless loop. In order to graph O, FGCT, and FGC, *grapher.py* should be run.
+From the Master node, *Main.py* runs jstat_starter, sleeps for one hour and extracts the jstat output from each instance in an endless loop. In order to graph O%, FGCT, and FGC, *grapher.py* should be run. The graph will be uploaded to s3 to specified bucket. 
 
 If desired, all jstat processes can be killed by running *jstat_killer.py*. 
 ___
-### Getting Started 
-In order to use Filtered Jstat, there must be at least one running EMR Cluster with instance(s) and the security group must have ssh/port 22 available.
+### Getting Started
+In order to use Filtered Jstat, there must be at least one running EMR Cluster with both master and worker node(s). the security group of the master node must have ssh/port 22 available.
 ___
 ### Executing Program
-within *jstat_capture.py* `SEARCH_TERM` should be changed to reflect the desired processes. 
+1. (required): open ssh on the security group of the master node from the local machine.
+2. run aws configure on the local machine, ensure that the region name is the same as the EMR Cluster Region:  
+    `aws configure` 
+2.  run *sftp_transfer.py* to transfer the private key from the local machine to the Master node:  
+    `python3 sftp_transfer.py`
+3. ssh into the master node of the cluster:  
+    `ssh -i <path_to_key> ec2-user@<MasterNode_PublicIP>`   
+4. install git:  
+    `sudo yum install git`
+5. create directory to place emr_project:  
+    `mkdir emr_test && cd emr_test` 
+6. pull emr_project to Master Node:   
+    `git init && git pull https://github.com/yan-bev/emr_jstat_project`
+7. install python modules:  
+    `pip install paramiko pandas matplotlib boto3`
+8. (optional): create an s3 bucket to hold the graphs (required): replace `s3_bucket_name` in *config.py* with the desired s3 bucket. 
+9. run main.py:  
+   `python3 main.py &`
+10. run *grapher.py* in the background:  
+    `python3 grapher.py`
+11. (optional): run *jps_killer.py* to stop all jps processes and jps output files on the worker node(s) as well as remove csv files from the master. this will also kill the *grapher.py* process.  
 
-within *grapher.py* and *extractor.py* the `CHANGE_PATH` variable should be changed to reflect the parent directory to which *extractor.py* writes to and *grapher.py* reads from.
-
-within *grapher.py* the `SAVE_PATH` variable should be changed to reflect the desired location to save the graph.png file.
 ___
 ### Graph Output With Test Data
 ![expected output](/graph/refined_jstat.png)
