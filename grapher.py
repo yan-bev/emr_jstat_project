@@ -3,7 +3,6 @@ import os
 import glob
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.dates import DayLocator
 import matplotlib.dates as mdates
 from matplotlib.ticker import AutoMinorLocator
 
@@ -23,7 +22,7 @@ def file_finder(directory_path=CHANGE_PATH):
     :param directory_path:
     :return: list of filepaths
     """
-    file_search = '/tmp/jstat_output/instance_*/jstat_*.csv'
+    file_search = 'instance_*/jstat_*.csv'
     finder = glob.glob(file_search, recursive=True)
     return(finder)
 
@@ -58,7 +57,6 @@ def perpare_csv():
     df['FGCTFGC'] = df['FGCT'] / df['FGC']
     df['\u0394FGCT'] = df['FGCT'].diff().fillna(0)
     df['\u0394FGC'] = df['FGC'].diff().fillna(0)
-
     return df
 
 
@@ -86,9 +84,8 @@ def plotter():
    # plot the FGCT Average
     ax3.plot(df.DateTime, df.FGCTFGC, marker='.',
              label=f'{split_filename[0][-4:]}_{split_filename[1][-8:-4]}')
-    # ax3.legend(bbox_to_anchor=(0.5, -0.5), fontsize=7, loc='upper center', ncol=2)
     ax3.set_title('FGCT Average').set_size(10)
-    ax3.set_xlabel('hour')
+    ax3.set_xlabel('hour', fontsize=10.5)
     ax3.set_ylabel('FGCT average (s)')
 
 def grapher():
@@ -100,19 +97,21 @@ def grapher():
     # ax1.xaxis.set_major_locator(DayLocator())
     ax1.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
     ax2.tick_params(axis='x', direction='out', length=3, width=1, grid_alpha=0.5)
-    ax3.tick_params(axis='x', direction='out', length=8, width=1, grid_alpha=0.5)
+    ax3.tick_params(axis='x', direction='out', length=10, width=1, grid_alpha=0.5)
 
     fig.suptitle("Refined Jstat")
-    plt.subplots_adjust(left=0.11,
-                        hspace=0.343)
 
+
+    ax3.tick_params(axis='x', which='major', labelsize=10.2)
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
 
-    hours = mdates.HourLocator(interval=6)
+    hours = mdates.HourLocator(interval=4)
     h_fmt = mdates.DateFormatter('%H')
 
-    ax3.xaxis.set_minor_locator(hours)
+    # ax3.xaxis.set_minor_locator(hours)
+    minor_locator = AutoMinorLocator(n=3)
+    ax3.xaxis.set_minor_locator(minor_locator)
     ax3.xaxis.set_minor_formatter(h_fmt)
     plt.setp(ax1.xaxis.get_minorticklabels())
 
@@ -124,12 +123,17 @@ def grapher():
         os.mkdir(SAVE_PATH)
         os.chdir(SAVE_PATH)
 
+    # layout
     axbox = ax3.get_position()
-    fig.legend(loc='lower center', ncol=2,
-               bbox_to_anchor=[0, axbox.y0 - 0.1, 1, 1],
+    fig.legend(loc='lower left', ncol=3,
+               bbox_to_anchor=[0, axbox.y0 - 0.08, 1, 1],
                bbox_transform=fig.transFigure)
 
+    plt.subplots_adjust(left=0.11,
+                        hspace=0.343)
+
     fig.savefig('refined_jstat.png')
+
 
 def s3_sender(s3_bucket=s3_b):
     s3 = boto3.resource('s3')
@@ -143,15 +147,10 @@ def s3_sender(s3_bucket=s3_b):
 if __name__ == '__main__':
     os.chdir(CHANGE_PATH)
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, sharex=True, figsize=(16,10))
-    for count, one_filename in enumerate(file_finder()):
+    for one_filename in file_finder():
         split_filename = (one_filename.split('/'))
-        print('split files')
         perpare_csv()
-        print('csv perpared')
         plotter()
-        print('plot finished')
     grapher()
-    print('graphed')
     s3_sender()
-    print('object sent')
-    #TODO: Fix Legend - added fig.legend (bbox_inches causing problem)
+    print(f'file sent to {s3_b}')
