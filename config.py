@@ -1,7 +1,7 @@
 s3_bucket_name = 'emr-graph-test-002'
 
 # the path to the pem key on the local machine
-local_key_path = r'C:\\Users\yaniv\Documents\get-a-job\USeast1keypair.pem'
+local_key_path = '/home/yaniv/get-a-job/USeast1keypair.pem'
 # the path to where the pe key should be saved on master
 master_key_path = '/home/ec2-user/USeast1keypair.pem'
 
@@ -24,4 +24,5 @@ csv_save = '/tmp/jstat_output'
 graph_dir = f'{parent_dir}/graph'
 # full path for graph
 graph_path = f'{graph_dir}/refined_jstat.png'
+
 

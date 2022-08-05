@@ -12,7 +12,8 @@ ___
 ### Executing Program
 1. (required): open ssh on the security group of the master node from the local machine.
 2. run aws configure on the local machine, ensure that the region name is the same as the EMR Cluster Region:  
-    `aws configure` 
+    `aws configure`
+3. change `local_key_path` in *config.py* to the approppriate key_file_path
 2.  run *sftp_transfer.py* to transfer the private key from the local machine to the Master node:  
     `python3 sftp_transfer.py`
 3. ssh into the master node of the cluster:  
