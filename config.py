@@ -1,15 +1,21 @@
-# s3 bucket to save graphs
+
+# -- change: s3 bucket to save graphs
 s3_bucket_name = 'emr-graph-test-002'
 
-# the path to the pem key on the local machine
+# -- change: the path to the pem key on the local machine
 local_key_path = '/home/yaniv/get-a-job/USeast1keypair.pem'
+
+# -- change: process search term to run jstat
+search_term = 'Main'
+
+# ----------------------------------------------------
+
+# user to be used for ssh
+user = 'ec2-user'
+
 # the path to where the pem key should be saved on master
 master_key_path = '/home/ec2-user/USeast1keypair.pem'
 
-#user to be used for ssh
-user = 'ec2-user'
-# process search term to run jstat
-search_term = 'Main'
 parent_dir = '/home/ec2-user/emr_jstat_project'
 
 
