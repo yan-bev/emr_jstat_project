@@ -1,4 +1,5 @@
 import boto3
+import socket
 import os
 import glob
 import pandas as pd
@@ -134,11 +135,13 @@ def grapher():
 
 
 def s3_sender(s3_bucket=s3_bucket_name, graph_loc=graph_path):
+    # find private ip address
+    priv_ip = socket.gethostbyname(socket.gethostname())
     s3 = boto3.resource('s3')
     s3.meta.client.upload_file(
         graph_loc,  # file location
         s3_bucket,  # s3 bucket name
-        "refined_jstat.png"  # object name
+        f"{priv_ip}/refined_jstat.png"  # object name
     )
 
 
