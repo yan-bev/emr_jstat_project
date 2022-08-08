@@ -44,8 +44,8 @@ def jstat_kill():
             print(f'killing: {pid}')
             # print(stderr.read(), file=sys.stderr)
             time.sleep(5)
-    os.remove(csv_save)
-    os.remove(graph_dir)
+    os.rmdir(csv_save)
+    os.rmdir(graph_dir)
 
 
 def process_kill():

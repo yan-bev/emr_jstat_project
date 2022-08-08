@@ -141,7 +141,7 @@ def s3_sender(s3_bucket=s3_bucket_name, graph_loc=graph_path):
     s3.meta.client.upload_file(
         graph_loc,  # file location
         s3_bucket,  # s3 bucket name
-        f"{priv_ip}/refined_jstat.png"  # object name
+        f"master_ip:{priv_ip}/refined_jstat.png"  # object name
     )
 
 

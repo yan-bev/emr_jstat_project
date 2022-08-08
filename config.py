@@ -1,8 +1,9 @@
+# s3 bucket to save graphs
 s3_bucket_name = 'emr-graph-test-002'
 
 # the path to the pem key on the local machine
 local_key_path = '/home/yaniv/get-a-job/USeast1keypair.pem'
-# the path to where the pe key should be saved on master
+# the path to where the pem key should be saved on master
 master_key_path = '/home/ec2-user/USeast1keypair.pem'
 
 #user to be used for ssh

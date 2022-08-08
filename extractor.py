@@ -75,5 +75,6 @@ def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=
             sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
 
 
-print(extract_files())
+if __name__ == '__main__':
+    extract_files()
 
