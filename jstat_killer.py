@@ -3,6 +3,7 @@ import signal
 
 import paramiko
 import time
+import shutil
 
 from config import user
 from config import csv_save
@@ -44,8 +45,8 @@ def jstat_kill():
             print(f'killing: {pid}')
             # print(stderr.read(), file=sys.stderr)
             time.sleep(5)
-    os.rmdir(csv_save)
-    os.rmdir(graph_dir)
+    shutil.rmtree(csv_save)
+    shutil.rmtree(graph_dir)
 
 
 def process_kill():
