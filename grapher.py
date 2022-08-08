@@ -83,7 +83,7 @@ def plotter():
 
    # plot the FGCT Average
     ax3.plot(df.DateTime, df.FGCTFGC, marker='.',
-             label=f'{split_filename[0][-4:]}_{split_filename[1][-8:-4]}')
+             label=f'inst:{split_filename[0][-4:]}_{split_filename[1][-8:-4]}')
     ax3.set_title('FGCT Average').set_size(10)
     ax3.set_xlabel('hour', fontsize=10.5)
     ax3.set_ylabel('FGCT average (s)')
