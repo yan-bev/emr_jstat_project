@@ -24,7 +24,7 @@ ___
     `git clone https://github.com/yan-bev/emr_jstat_project`
 7. install python modules:  
     `pip install paramiko pandas matplotlib boto3`
-8. (optional): create an s3 bucket to hold the graphs (required): replace `s3_bucket_name` in *config.py* with the desired s3 bucket. 
+8. (optional): create a s3 bucket to hold the graphs (required): replace `s3_bucket_name` in *config.py* with the desired s3 bucket. 
 9. run main.py:  
    `python3 main.py &`
 10. run *grapher.py* in the background:  

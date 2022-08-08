@@ -10,7 +10,7 @@ master_key_path = '/home/ec2-user/USeast1keypair.pem'
 user = 'ec2-user'
 # process search term to run jstat
 search_term = 'Main'
-parent_dir = '/home/ec2-user/emr_two'
+parent_dir = '/home/ec2-user/emr_jstat_project'
 
 
 # the path to the bash script which pulls worker node ips
