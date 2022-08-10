@@ -3,7 +3,7 @@
 s3_bucket_name = 'emr-graph-test-002'
 
 # -- change: the path to the pem key on the local machine
-local_key_path = '/home/yaniv/get-a-job/USeast1keypair.pem'
+local_key_path = '/home/yaniv/USeast1keypair.pem'
 
 # -- change: process search term to run jstat
 search_term = 'Main'
