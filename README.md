@@ -29,7 +29,7 @@ ___
    `python3 main.py &`
 10. run *grapher.py* in the background:  
     `python3 grapher.py`
-11. (optional): run *jps_killer.py* to stop all jps processes and jps output files on the worker node(s) as well as remove csv files from the master. this will also kill the *grapher.py* process.  
+11. (optional): run *jps_killer.py* to stop all jps processes and jps output files on the worker node(s) as well as remove csv files from the master. this will also kill the *main.py* process.  
 
 ___
 ### Graph Output With Test Data
