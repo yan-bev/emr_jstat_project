@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 import configparser
-import io 
+import io
 
 
 
