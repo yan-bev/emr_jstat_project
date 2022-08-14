@@ -5,14 +5,20 @@ import pandas as pd
 from pathlib import Path
 import os
 from datetime import datetime, timedelta
+import configparser
 
-from config import csv_save
-from config import master_key_path
-from config import user
+
 
 from jstat_capture import node_ips
 from jstat_capture import jps_command
+from jstat_capture import get_secret
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
+user = config['cnfg']['User']
+csv_save = config['cnfg']['CsvSave']
 
 pids = jps_command()
 
@@ -30,7 +36,7 @@ def ec2_worker_label(ips=node_ips()):
     return ec2_label
 
 
-def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=pids, ec2_label=ec2_worker_label()):
+def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec2_label=ec2_worker_label()):
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
      to a local folder as a csv. the files are saved in the following path
@@ -38,7 +44,11 @@ def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=
     :return:
     """
 
-    k = paramiko.RSAKey.from_private_key_file(f'{key_file}')
+    private_key_str = io.StringIO()
+    private_key_str.write(key)
+    private_key_str.seek(0)
+
+    key = paramiko.RSAKey.from_private_key_file(private_key_str)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -48,7 +58,7 @@ def extract_files(ips=node_ips(), username=user, key_file=master_key_path, pids=
         ssh.connect(
             hostname=ip,
             username=username,
-            pkey=k,
+            pkey=key,
             allow_agent=False,
             look_for_keys=False
             )

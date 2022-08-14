@@ -5,15 +5,19 @@ import time
 import boto3
 import io
 from botocore.exceptions import ClientError
+import configparser
 
-from config import csv_save
-from config import search_term
-from config import master_key_path
-from config import secret_name
-from config import region_name
-from config import bash_script_path
-from config import ip_text_path
-from config import user
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+bash_script_path = config['cnfg']['BashScriptPath']
+ip_text_path = config['cnfg']['IpTextPath']
+region_name = config['cnfg']['RegionName']
+secret_name = config['cnfg']['SecretName']
+user = config['cnfg']['User']
+search_term = config['cnfg']['SearchTerm']
+csv_save = config['cnfg']['CsvSave']
+
 
 
 def populate_node_ip(path=bash_script_path):

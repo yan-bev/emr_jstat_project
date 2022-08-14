@@ -5,12 +5,20 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import configparser
 from matplotlib.ticker import AutoMinorLocator
 
-from config import graph_dir
-from config import csv_save
-from config import graph_path
-from config import s3_bucket_name
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
+s3_bucket_name = config['cnfg']['S3BucketName']
+graph_dir = config['cnfg']['GraphDir']
+graph_path = config['cnfg']['GraphPath']
+csv_save = config['cnfg']['CsvSave']
+
 
 
 def file_finder(change_path=csv_save):

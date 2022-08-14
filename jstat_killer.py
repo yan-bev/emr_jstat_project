@@ -4,24 +4,34 @@ import signal
 import paramiko
 import time
 import shutil
+import configparser
 
-from config import user
-from config import csv_save
-from config import master_key_path
-from config import graph_dir
-from config import search_term
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
+user = config['cnfg']['User']
+csv_save = config['cnfg']['CsvSave']
+graph_dir = config['cnfg']['GraphDir']
+
 
 from jstat_capture import node_ips
 from jstat_capture import jps_command
+from jstat_capture import get_secret
 
 
-def jstat_kill():
+def jstat_kill(pkey=get_secret()):
     """
     kills all running jstat processes from jstat_capture
     also removes the tmp/jstat_output directory
     :return:
     """
-    k = paramiko.RSAKey.from_private_key_file(master_key_path)
+
+    private_key_str = io.StringIO()
+    private_key_str.write(pkey)
+    private_key_str.seek(0)
+
+    key = paramiko.RSAKey.from_private_key_file(private_key_str)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -33,7 +43,7 @@ def jstat_kill():
         ssh.connect(
             hostname=ip,
             username=user,
-            pkey=k,
+            pkey=key,
             allow_agent=False,
             look_for_keys=False
         )
