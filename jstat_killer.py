@@ -4,6 +4,7 @@ import signal
 import paramiko
 import time
 import shutil
+import io
 import configparser
 
 config = configparser.ConfigParser()
