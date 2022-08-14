@@ -1,4 +1,3 @@
-
 # -- change: s3 bucket to save graphs
 s3_bucket_name = 'emr-graph-test-002'
 
@@ -8,15 +7,19 @@ local_key_path = '/home/yaniv/USeast1keypair.pem'
 # -- change: process search term to run jstat
 search_term = 'Main'
 
-# ----------------------------------------------------
+secret_name = "USeast1keypair.pem"
+
+region_name = "us-east-1"
 
 # user to be used for ssh
-user = 'ec2-user'
+user = 'hadoop'
+
+# ----------------------------------------------------
 
 # the path to where the pem key should be saved on master
-master_key_path = '/home/ec2-user/USeast1keypair.pem'
+master_key_path = f'/home/{user}/{secret_name}'
 
-parent_dir = '/home/ec2-user/emr_jstat_project'
+parent_dir = f'/home/{user}/emr_jstat_project'
 
 
 # the path to the bash script which pulls worker node ips

@@ -2,10 +2,15 @@ import subprocess
 import paramiko
 import os
 import time
+import boto3
+import io
+from botocore.exceptions import ClientError
 
 from config import csv_save
 from config import search_term
 from config import master_key_path
+from config import secret_name
+from config import region_name
 from config import bash_script_path
 from config import ip_text_path
 from config import user
@@ -24,9 +29,24 @@ def node_ips(filepath=ip_text_path):
     os.remove(filepath)
     return ip_list
 
-# print(node_ips())
+def get_secret():
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        raise e
+    else:
+        secret = get_secret_value_response['SecretString']
+    return secret
 
-def jps_command(ip_list=node_ips(), user=user):
+def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
     """
     returns the jps output for the requested search-term for each instance in each cluster
     formatted to only present PID.
@@ -34,10 +54,15 @@ def jps_command(ip_list=node_ips(), user=user):
     lists within list [[pid per instance]]
     """
 
+
     command = f"sudo jps | grep -i '{search_term}' | tr -d [:alpha:]"
 
+    private_key_str = io.StringIO()
+    private_key_str.write(key)
+    private_key_str.seek(0)
 
-    k = paramiko.RSAKey.from_private_key_file(f'{master_key_path}')
+    key = paramiko.RSAKey.from_private_key(private_key_str)
+    private_key_str.close()
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -47,7 +72,7 @@ def jps_command(ip_list=node_ips(), user=user):
         ssh.connect(
             hostname=ip,
             username=user,
-            pkey=k,
+            pkey=key,
             allow_agent=False,
             look_for_keys=False
         )
@@ -65,8 +90,20 @@ def jps_command(ip_list=node_ips(), user=user):
     return PIDs
 
 
-def jstat_starter(ip_list=node_ips(), PIDs=jps_command()):
-    k = paramiko.RSAKey.from_private_key_file(f'{master_key_path}')
+def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
+    """
+
+    :param ip_list:
+    :param PIDs:
+    :param key:
+    :return:
+    """
+    private_key_str = io.StringIO()
+    private_key_str.write(key)
+    private_key_str.seek(0)
+
+    key = paramiko.RSAKey.from_private_key(private_key_str)
+    private_key_str.close()
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -74,7 +111,7 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command()):
         ssh.connect(
             hostname=f'{ip}',
             username=user,
-            pkey=k,
+            pkey=key,
             allow_agent=False,
             look_for_keys=False
         )
