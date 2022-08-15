@@ -30,7 +30,7 @@ ___
         }
 ```
 6. ssh into the master node of the cluster:  
-    `ssh -i <path_to_key> ec2-user@<MasterNode_PublicIP>`   
+    `ssh -i <path_to_key> <desired_user>@<MasterNode_PublicIP>`   
 7. install git:  
     `sudo yum install git`
 8. clone emr_project to Master Node:   
