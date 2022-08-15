@@ -56,8 +56,8 @@ def jstat_kill(pkey=get_secret()):
             print(f'killing: {pid}')
             # print(stderr.read(), file=sys.stderr)
             time.sleep(5)
-    shutil.rmtree(csv_save)
-    shutil.rmtree(graph_dir)
+    shutil.rmtree(csv_save, ignore_errors=True)
+    shutil.rmtree(graph_dir, ignore_errors=True)
 
 
 def process_kill():
