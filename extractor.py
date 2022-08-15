@@ -49,7 +49,7 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
     private_key_str.write(key)
     private_key_str.seek(0)
 
-    key = paramiko.RSAKey.from_private_key_file(private_key_str)
+    key = paramiko.RSAKey.from_private_key(private_key_str)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
