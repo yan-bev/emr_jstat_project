@@ -32,7 +32,7 @@ def jstat_kill(pkey=get_secret()):
     private_key_str.write(pkey)
     private_key_str.seek(0)
 
-    key = paramiko.RSAKey.from_private_key_file(private_key_str)
+    key = paramiko.RSAKey.from_private_key(private_key_str)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
