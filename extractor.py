@@ -85,10 +85,10 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
                     os.chdir(csv_save)
                     final_dest = f'{output_dir}/jstat_{pid}.csv'
                     jstat.to_csv(final_dest, mode='a', index=False, header=False)
-                print(f'saving: jstat output to {final_dest}')
+                print(f'saving: jstat_{pid} to master')
                 sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
             except IOError:
-                print(f'{csv_save}/jstat_{pid} does not exit on machine:{ip}')
+                print(f'{csv_save}/jstat_{pid} does not exist on machine:{ip}')
                 pass
 
 
