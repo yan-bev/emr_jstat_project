@@ -66,24 +66,29 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
 
         for pid in pids[i]:
             sftp = ssh.open_sftp()
-            readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
-            readfile.prefetch()
-            for line in readfile:
-                line = line.split()
-                liner = [(itemgetter(3, 8, 9)(line))]
+            # TODO: add try, so that if the file isin't found the script doesn't collapse
+            try:
+                readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
+                readfile.prefetch()
+                for line in readfile:
+                    line = line.split()
+                    liner = [(itemgetter(3, 8, 9)(line))]
 
-                jstat = pd.DataFrame(liner)
+                    jstat = pd.DataFrame(liner)
 
-                d1 = datetime.now() - timedelta(hours=1)
-                dtime = pd.to_datetime(d1)
-                jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
+                    d1 = datetime.now() - timedelta(hours=1)
+                    dtime = pd.to_datetime(d1)
+                    jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-                output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
-                output_dir.mkdir(parents=True, exist_ok=True)
-                os.chdir(csv_save)
-                final_dest = f'{output_dir}/jstat_{pid}.csv'
-                jstat.to_csv(final_dest, mode='a', index=False, header=False)
-            sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
+                    output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    os.chdir(csv_save)
+                    final_dest = f'{output_dir}/jstat_{pid}.csv'
+                    jstat.to_csv(final_dest, mode='a', index=False, header=False)
+                sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
+            except IOError:
+                print(f'{csv_save}/jstat_{pid} does not exit on machine:{ip}')
+                pass
 
 
 if __name__ == '__main__':
