@@ -146,6 +146,7 @@ if __name__ == '__main__':
     ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         for i, ip in enumerate(ip_list):
+            print(i, ip)
             executor.submit(jstat_starter(ip, i))
             print(f'jstat begun on {i}:{ip}')
 
