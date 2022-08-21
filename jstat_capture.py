@@ -109,7 +109,7 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
     return PIDs
 
 
-def jstat_starter(ip, PIDs=jps_command(), key=get_secret()):
+def jstat_starter(ip, counter, PIDs=jps_command(), key=get_secret()):
     """
     starts jstat on every Process listed in jps_command
     :param ip_list: list of ips
@@ -135,7 +135,7 @@ def jstat_starter(ip, PIDs=jps_command(), key=get_secret()):
         look_for_keys=False
     )
 
-    for pid in PIDs[i]:
+    for pid in PIDs[counter]:
         # print(ip, pid)
         ssh.exec_command(f'mkdir -p {csv_save} && sudo jstat -gcutil {pid} 10000 > {csv_save}/jstat_{pid} &', timeout=1)
         # time.sleep(5)
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         for i, ip in enumerate(ip_list):
-            executor.submit(jstat_starter(ip))
+            executor.submit(jstat_starter(ip, i))
             print(f'jstat begun on {i}:{ip}')
 
 
