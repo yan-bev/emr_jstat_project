@@ -96,7 +96,7 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
             look_for_keys=False
         )
         stdin, stdout, stderr = ssh.exec_command(command)
-        standard_jps_output.append(stdout.read())
+        # standard_jps_output.append(stdout.read())
         ssh.close()
         # print(standard_jps_output)
 
@@ -136,9 +136,10 @@ def jstat_starter(ip, PIDs=jps_command(), key=get_secret()):
     )
 
     for pid in PIDs[i]:
-        print(ip, pid)
+        # print(ip, pid)
         ssh.exec_command(f'mkdir -p {csv_save} && sudo jstat -gcutil {pid} 10000 > {csv_save}/jstat_{pid} &', timeout=1)
-        time.sleep(5)
+        # time.sleep(5)
+    ssh.close()
 
 
 if __name__ == '__main__':
@@ -146,5 +147,6 @@ if __name__ == '__main__':
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         for i, ip in enumerate(ip_list):
             executor.submit(jstat_starter(ip))
+            print(f'jstat begun on {i}:{ip}')
 
 
