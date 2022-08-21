@@ -109,7 +109,7 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
     return PIDs
 
 
-def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
+def jstat_starter(ip, ip_counter=node_ips(), PIDs=jps_command(), key=get_secret()):
     """
     starts jstat on every Process listed in jps_command
     :param ip_list: list of ips
@@ -126,9 +126,9 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    for i, ip in enumerate(ip_list):
+    for i, _ in enumerate(ip_counter):
         ssh.connect(
-            hostname=f'{ip}',
+            hostname=ip,
             username=user,
             pkey=key,
             allow_agent=False,
@@ -144,8 +144,6 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
 if __name__ == '__main__':
     ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        for _ in range(len(ip_list)):
-            executor.submit(jstat_starter())
-
+        futureSSH = {executor.submit (jstat_starter(ip_list)): ip for ip in ip_list}
 
 
