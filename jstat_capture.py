@@ -96,7 +96,7 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
             look_for_keys=False
         )
         stdin, stdout, stderr = ssh.exec_command(command)
-        # standard_jps_output.append(stdout.read())
+        standard_jps_output.append(stdout.read())
         ssh.close()
         # print(standard_jps_output)
 
