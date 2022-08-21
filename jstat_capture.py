@@ -4,6 +4,7 @@ import os
 import time
 import boto3
 import io
+import concurrent.futures
 from botocore.exceptions import ClientError
 import configparser
 
@@ -127,5 +128,9 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
 
 
 if __name__ == '__main__':
-    jstat_starter()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futureSSH = {executor.submit(jstat_starter): ip for ip in node_ips()}
+        for future in concurrent.futures.as_completed(futureSSH):
+            print((futureSSH[future]))
+
 
