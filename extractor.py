@@ -43,7 +43,7 @@ def ec2_worker_label(ips=node_ips()):
     return ec2_label
 
 
-def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec2_label=ec2_worker_label()):
+def extract_files(ip, counter, username=user, key=get_secret(), pids=pids, ec2_label=ec2_worker_label()):
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
      to a local folder as a csv. the files are saved in the following path
@@ -59,37 +59,34 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
+    ssh.connect(
+        hostname=ip,
+        username=username,
+        pkey=key,
+        allow_agent=False,
+        look_for_keys=False
+        )
 
-    for i, ip in enumerate(ips):
+    for pid in pids[counter]:
+        sftp = ssh.open_sftp()
+        readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
+        readfile.prefetch()
+        for line in readfile:
+            line = line.split()
+            liner = [(itemgetter(3, 8, 9)(line))]
 
-        ssh.connect(
-            hostname=ip,
-            username=username,
-            pkey=key,
-            allow_agent=False,
-            look_for_keys=False
-            )
+            jstat = pd.DataFrame(liner)
 
-        for pid in pids[i]:
-            sftp = ssh.open_sftp()
-            readfile = sftp.open(filename=f'/tmp/jstat_output/jstat_{pid}', mode='r', bufsize=32768)
-            readfile.prefetch()
-            for line in readfile:
-                line = line.split()
-                liner = [(itemgetter(3, 8, 9)(line))]
+            d1 = datetime.now() - timedelta(hours=1)
+            dtime = pd.to_datetime(d1)
+            jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-                jstat = pd.DataFrame(liner)
-
-                d1 = datetime.now() - timedelta(hours=1)
-                dtime = pd.to_datetime(d1)
-                jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
-
-                output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
-                output_dir.mkdir(parents=True, exist_ok=True)
-                os.chdir(csv_save)
-                final_dest = f'{output_dir}/jstat_{pid}.csv'
-                jstat.to_csv(final_dest, mode='a', index=False, header=False)
-            sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
+            output_dir = Path(f"{csv_save}/instance_{ec2_label[i]}")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            os.chdir(csv_save)
+            final_dest = f'{output_dir}/jstat_{pid}.csv'
+            jstat.to_csv(final_dest, mode='a', index=False, header=False)
+        sftp.truncate(path=f'{csv_save}/jstat_{pid}', size=0)
 
 
 if __name__ == '__main__':
