@@ -22,11 +22,21 @@ csv_save = config['cnfg']['CsvSave']
 
 
 def populate_node_ip(path=bash_script_path):
+    '''
+    Runs the IP populator bash script
+    :param path: path/to/file
+    :return: none
+    '''
     os.chmod(path=path, mode=0o755) # changes mode to exec
     subprocess.call(path)  # runs the exec
 
 
 def node_ips(filepath=ip_text_path):
+    '''
+    creates a variable which contains all the Worker IPs in the cluster, then deletes the text file.
+    :param filepath: to created Ip text list
+    :return: variable list
+    '''
     populate_node_ip() # populates the ip_text_path.txt file
     ip_list = open(filepath).read().splitlines()
     ip_list = set(ip_list)
@@ -35,6 +45,10 @@ def node_ips(filepath=ip_text_path):
     return ip_list
 
 def get_secret():
+    '''
+    pulls the secret from Secret Manager
+    :return: secret as string
+    '''
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
@@ -53,10 +67,10 @@ def get_secret():
 
 def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
     """
-    returns the jps output for the requested search-term for each instance in each cluster
+    returns the jps output for the requested search-term for each instance in the cluster
     formatted to only present PID.
     :return:
-    lists within list [[pid per instance]]
+     [pid per instance][pids per instance]
     """
 
 
@@ -97,11 +111,11 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
 
 def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
     """
-
-    :param ip_list:
-    :param PIDs:
-    :param key:
-    :return:
+    starts jstat on every Process listed in jps_command
+    :param ip_list: list of ips
+    :param PIDs:list of PIDS
+    :param key: ssh key
+    :return: none
     """
     private_key_str = io.StringIO()
     private_key_str.write(key)

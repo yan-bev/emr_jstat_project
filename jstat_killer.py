@@ -1,5 +1,6 @@
 import os
 import signal
+import concurrent.futures
 
 import paramiko
 import time
@@ -23,9 +24,8 @@ from jstat_capture import get_secret
 
 def jstat_kill(pkey=get_secret()):
     """
-    kills all running jstat processes from jstat_capture
-    also removes the tmp/jstat_output directory
-    :return:
+    kills all running jstat processes worker and removes the tmp/jstat_output directory from worker nodes
+    :return: none
     """
 
     private_key_str = io.StringIO()
@@ -61,6 +61,10 @@ def jstat_kill(pkey=get_secret()):
 
 
 def process_kill():
+    '''
+    kills main.py process
+    :return: none
+    '''
     try:
         for ps_output in os.popen(f"ps ax | grep -i 'main.py' | grep -v grep"):
             fields = ps_output.split()
@@ -72,6 +76,9 @@ def process_kill():
         print('Error while killing main.py')
 
 if __name__ == '__main__':
-    jstat_kill()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futureSSH = {executor.submit(jstat_kill()): ip for ip in node_ips()}
+        for future in concurrent.futures.as_completed(futureSSH):
+            print((futureSSH[future]))
     process_kill()
 

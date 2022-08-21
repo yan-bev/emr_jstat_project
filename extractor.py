@@ -25,6 +25,11 @@ csv_save = config['cnfg']['CsvSave']
 pids = jps_command()
 
 def ec2_worker_label(ips=node_ips()):
+    '''
+    creates a label to be used in order to label the Ec2s
+    :param ips: the ips to shorten
+    :return: a shorted ec2 Ip label
+    '''
     s = []
     for ip in ips:
         throwaway = []
@@ -42,7 +47,7 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
     """
     the function opens the requested files, reads it, and saves O,FGC, and FGCT
      to a local folder as a csv. the files are saved in the following path
-     cluster/instance/jstat_output.csv. following write, the remote file is truncated to 0 bytes.
+     tmp/jstat_output/instance/jstat_output.csv. following write, the remote file is truncated to 0 bytes.
     :return:
     """
 
