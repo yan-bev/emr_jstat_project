@@ -144,7 +144,7 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
 if __name__ == '__main__':
     ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        for _ in range(ip_list):
+        for _ in range(len(ip_list)):
             executor.submit(jstat_starter())
 
 
