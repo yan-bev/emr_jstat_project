@@ -1,4 +1,5 @@
 import datetime
+import concurrent.futures
 import paramiko
 from operator import itemgetter
 import pandas as pd
@@ -87,5 +88,8 @@ def extract_files(ips=node_ips(), username=user, key=get_secret(), pids=pids, ec
 
 
 if __name__ == '__main__':
-    extract_files()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futureSSH = {executor.submit(extract_files()): ip for ip in node_ips()}
+        for future in concurrent.futures.as_completed(futureSSH):
+            print((futureSSH[future]))
 
