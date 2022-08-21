@@ -2,6 +2,7 @@ import subprocess
 import paramiko
 import os
 import time
+from itertools import chain
 import boto3
 import io
 import concurrent.futures
@@ -142,8 +143,9 @@ def jstat_starter(ip, counter, PIDs=jps_command(), key=get_secret()):
 
 if __name__ == '__main__':
     ip_list = node_ips()
+    counter = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        ssh_future = {executor.submit(jstat_starter(ip, counter)): ip for ip in ip_list, for counter in range(len(ip_list))}
+        ssh_future = {executor.map(jstat_starter, ip, range(len((node_ips())))): ip for ip in ip_list}
         for future in concurrent.futures.as_completed(ssh_future):
             print((f'jstat completed on {ssh_future[future]}'))
 
