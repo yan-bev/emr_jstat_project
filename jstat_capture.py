@@ -142,9 +142,10 @@ def jstat_starter(ip_list=node_ips(), PIDs=jps_command(), key=get_secret()):
 
 
 if __name__ == '__main__':
+    ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futureSSH = {executor.submit(jstat_starter()): ip for ip in node_ips()}
-        for future in concurrent.futures.as_completed(futureSSH):
-            print((futureSSH[future]))
+        for _ in range(ip_list):
+            executor.submit(jstat_starter())
+
 
 
