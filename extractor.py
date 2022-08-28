@@ -73,9 +73,10 @@ def extract_files(ip):
     files.append(stdout.read())
     sftp = ssh.open_sftp()
     # TODO: transfer full directory/open each file following a globsearch/a find files.
+    # formatted_files = []
     for formatted_files in files:
-        formatted_files = formatted_files.decode("utf-8").replace('\n', '').strip().split()
-
+        formatted_files = formatted_files.decode("utf-8").replace('\n', ',').strip().split()
+    print(formatted_files)
     for filename in formatted_files:
         print(filename)
         readfile = sftp.open(filename=f'/tmp/jstat_output/{filename}', mode='r', bufsize=32768)
