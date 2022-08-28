@@ -103,6 +103,7 @@ def jps_command_and_starter(ip):
     for pid in standard_jps_output:
         pid = pid.decode("utf-8").replace('\n', '').strip().split()
         PIDs.append(pid)
+    print(PIDs)
 
 
     for pid in PIDs:
