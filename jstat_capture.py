@@ -96,7 +96,6 @@ def jps_command_and_starter(ip):
     print(f'connected to {ip}')
     stdin, stdout, stderr = ssh.exec_command(get_PIDs)
     standard_jps_output.append(stdout.read())
-    print(standard_jps_output)
     # TODO: See what this output looks like, and see if i can make the PIDs usable without resorting to python.
 
     PIDs = []
@@ -104,11 +103,11 @@ def jps_command_and_starter(ip):
     for pid in standard_jps_output:
         pid = pid.decode("utf-8").replace('\n', '').strip().split()
         PIDs.append(pid)
-        print(pid)
+
 
     for pid in PIDs:
+        print(pid)
         ssh.exec_command(f'mkdir -p {csv_save} && sudo jstat -gcutil {pid} 10000 > {csv_save}/jstat_{pid} &', timeout=1)
-        # print(f'testing: jstat has begun on {pid}')
     ssh.close()
 
 
