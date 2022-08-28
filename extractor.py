@@ -68,12 +68,13 @@ def extract_files(ip):
         allow_agent=False,
         look_for_keys=False
         )
-
+    print(ip)
     stdin, stdout, stderr = ssh.exec_command(f'ls /tmp/jstat_output')
     files.append(stdout.read())
     sftp = ssh.open_sftp()
     # TODO: transfer full directory/open each file following a globsearch/a find files.
     for filename in files:
+        print(filename)
         readfile = sftp.open(filename=f'/tmp/jstat_output/{filename}', mode='r', bufsize=32768)
         readfile.prefetch()
         for line in readfile:
@@ -86,7 +87,7 @@ def extract_files(ip):
             dtime = pd.to_datetime(d1)
             jstat.insert(0, "DateTime", dtime, allow_duplicates=True)
 
-            output_dir = Path(f"{csv_save}/instance_{ip[-4:]}") #TODO: try this out
+            output_dir = Path(f"{csv_save}/instance_{ip}") #TODO: try this out
             output_dir.mkdir(parents=True, exist_ok=True)
             os.chdir(csv_save)
             final_dest = f'{output_dir}/{filename}.csv'
