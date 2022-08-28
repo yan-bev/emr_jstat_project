@@ -66,17 +66,16 @@ def get_secret():
         secret = get_secret_value_response['SecretString']
     return secret
 
-def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
+def jps_command_and_starter(ip):
     """
     returns the jps output for the requested search-term for each instance in the cluster
     formatted to only present PID.
     :return:
      [pid per instance][pids per instance]
     """
-
-
-    command = f"sudo jps | grep -i '{search_term}' | tr -d [:alpha:]"
-
+    key = get_secret()
+    get_PIDs = f"sudo jps | grep -i '{search_term}' | tr -d [:alpha:]"
+    # jstat_start = f'mkdir -p {csv_save} && sudo jstat -gcutil {pid} 10000 > {csv_save}/jstat_{pid} &'
     private_key_str = io.StringIO()
     private_key_str.write(key)
     private_key_str.seek(0)
@@ -86,66 +85,34 @@ def jps_command(ip_list=node_ips(), user=user, key=get_secret()):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-
     standard_jps_output = []
-    for ip in ip_list:
-        ssh.connect(
+    ssh.connect(
             hostname=ip,
             username=user,
             pkey=key,
             allow_agent=False,
             look_for_keys=False
         )
-        stdin, stdout, stderr = ssh.exec_command(command)
-        standard_jps_output.append(stdout.read())
-        ssh.close()
+    stdin, stdout, stderr = ssh.exec_command(get_PIDs)
+    standard_jps_output.append(stdout.read())
+    # TODO: See what this output looks like, and see if i can make the PIDs usable without resorting to python.
 
     PIDs = []
+    # TODO: try and turn this into list comprehension
     for pid in standard_jps_output:
-        # throw = []
         throw = pid.decode("utf-8").replace('\n', '').strip().split()
         PIDs.append(throw)
         del throw
-    return PIDs
 
-
-def jstat_starter(ip, counter, PIDs=jps_command(), key=get_secret()):
-    """
-    starts jstat on every Process listed in jps_command
-    :param ip_list: list of ips
-    :param PIDs:list of PIDS
-    :param key: ssh key
-    :return: none
-    """
-    private_key_str = io.StringIO()
-    private_key_str.write(key)
-    private_key_str.seek(0)
-
-    key = paramiko.RSAKey.from_private_key(private_key_str)
-    private_key_str.close()
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-
-    ssh.connect(
-        hostname=ip,
-        username=user,
-        pkey=key,
-        allow_agent=False,
-        look_for_keys=False
-    )
-
-    for pid in PIDs[counter]:
+    for pid in PIDs:
         ssh.exec_command(f'mkdir -p {csv_save} && sudo jstat -gcutil {pid} 10000 > {csv_save}/jstat_{pid} &', timeout=1)
-        # time.sleep(5)
+        # print(f'testing: jstat has begun on {pid}')
     ssh.close()
 
 
 if __name__ == '__main__':
     ip_list = node_ips()
-    counter = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        ssh_future = {executor.map(jstat_starter, ip, range(len((node_ips())))): ip for ip in ip_list}
-        for future in concurrent.futures.as_completed(ssh_future):
-            print((f'jstat completed on {ssh_future[future]}'))
-
+        futureSSH = {executor.submit(jps_command_and_starter, ip): ip for ip in ip_list}
+        for future in concurrent.futures.as_completed(futureSSH):
+            print(f'jstat begun on:{futureSSH[future]}')

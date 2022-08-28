@@ -18,15 +18,15 @@ graph_dir = config['cnfg']['GraphDir']
 
 
 from jstat_capture import node_ips
-from jstat_capture import jps_command
 from jstat_capture import get_secret
 
 
-def jstat_kill(pkey=get_secret()):
+def jstat_kill(ip):
     """
     kills all running jstat processes worker and removes the tmp/jstat_output directory from worker nodes
     :return: none
     """
+    pkey = get_secret()
 
     private_key_str = io.StringIO()
     private_key_str.write(pkey)
@@ -37,25 +37,25 @@ def jstat_kill(pkey=get_secret()):
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 
-    ips = node_ips()
-    pids = jps_command()
+    pids = []
+    ssh.connect(
+        hostname=ip,
+        username=user,
+        pkey=key,
+        allow_agent=False,
+        look_for_keys=False
+    )
+    stdin, stdout, stderr = ssh.exec_command(f'ls /tmp/jstat_output')
+    pids.append(stdout.read())
 
-    for i, ip in enumerate(ips):
-        ssh.connect(
-            hostname=ip,
-            username=user,
-            pkey=key,
-            allow_agent=False,
-            look_for_keys=False
-        )
-        ssh.exec_command(f'sudo rm -r {csv_save}', timeout=1)
-        print(f'removing {csv_save} in {ip}')
+    ssh.exec_command(f'sudo rm -r {csv_save}', timeout=1)
+    print(f'removing {csv_save} in {ip}')
+    # print(stderr.read(), file=sys.stderr)
+    for pid in pids:
+        stdin, stdout, stderr = ssh.exec_command(f'sudo kill -9 {pid[6:10]}', timeout=1) # make sure this works
+        print(f'killing: {pid}')
         # print(stderr.read(), file=sys.stderr)
-        for pid in pids[i]:
-            stdin, stdout, stderr = ssh.exec_command(f'sudo kill -9 {pid}', timeout=1)
-            print(f'killing: {pid}')
-            # print(stderr.read(), file=sys.stderr)
-            time.sleep(5)
+        time.sleep(2)
     shutil.rmtree(csv_save, ignore_errors=True)
     shutil.rmtree(graph_dir, ignore_errors=True)
 
@@ -75,10 +75,12 @@ def process_kill():
     except:
         print('Error while killing main.py')
 
+
 if __name__ == '__main__':
+    ip_list = node_ips()
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futureSSH = {executor.submit(jstat_kill()): ip for ip in node_ips()}
+        futureSSH = {executor.submit(jstat_kill, ip): ip for ip in ip_list}
         for future in concurrent.futures.as_completed(futureSSH):
-            print((futureSSH[future]))
+            print(f'/tmp/jstat_output removed and jstat stopped on: {futureSSH[future]}')
     process_kill()
 
