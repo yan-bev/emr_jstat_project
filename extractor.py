@@ -79,7 +79,6 @@ def extract_files(ip):
         formatted_files = unformatted_files.decode().replace('\n', ' ').strip().split()
 
     for filename in formatted_files:
-        print(filename)
         readfile = sftp.open(filename=f'/tmp/jstat_output/{filename}', mode='r', bufsize=32768)
         readfile.prefetch()
         for line in readfile:
