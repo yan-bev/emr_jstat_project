@@ -39,7 +39,7 @@ ___
     `pip install paramiko pandas matplotlib boto3`
 10. (optional): create a s3 bucket to hold the graphs (required): replace `S3BucketName` in *config.ini* with the desired s3 bucket. 
 11. run main.py:  
-   `python3 main.py &`
+   `python3 main.py & > /dev/null`
 12. run *grapher.py*:  
     `python3 grapher.py`
 13. (optional): run *jps_killer.py* to stop all jps processes and jps output files on the worker node(s) as well as remove csv files from the master. this will also kill the *main.py* process.  
