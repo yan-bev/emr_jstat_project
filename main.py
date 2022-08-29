@@ -8,7 +8,7 @@ from jstat_capture import jps_command_and_starter
 from extractor import extract_files
 
 config = configparser.ConfigParser()
-
+config.read('config.ini')
 sleeptime = config['cnfg']['Hours']
 
 

@@ -49,11 +49,9 @@ def jstat_kill(ip):
     pids.append(stdout.read())
 
     ssh.exec_command(f'sudo rm -r {csv_save}', timeout=1)
-    print(f'removing {csv_save} in {ip}')
     # print(stderr.read(), file=sys.stderr)
     for pid in pids:
         stdin, stdout, stderr = ssh.exec_command(f'sudo kill -9 {pid[6:10]}', timeout=1) # make sure this works
-        print(f'killing: {pid}')
         # print(stderr.read(), file=sys.stderr)
         time.sleep(2)
     shutil.rmtree(csv_save, ignore_errors=True)
